@@ -458,6 +458,8 @@ with aba3:
                 mapa = gpd.read_file("SHP_UFs/{sessionUF}.shp")
                 return mapa
             
+            st.write('mapa')
+            st.write(st.session_state.inp_UFmapa)
             
             mapa = lerMapa(st.session_state.inp_UFmapa)
             
