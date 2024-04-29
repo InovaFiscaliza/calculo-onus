@@ -455,7 +455,7 @@ with aba3:
             
             @st.cache_data
             def lerMapa(sessionUF):
-                mapa = gpd.read_file(f"C:/Users/yroar/Downloads/SHP_UFs/{sessionUF}.shp")
+                mapa = gpd.read_file("SHP_UFs/{sessionUF}.shp")
                 return mapa
             
             
