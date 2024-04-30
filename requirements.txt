@@ -6,5 +6,5 @@ streamlit
 folium
 geopandas
 
-streamlit-folium
+streamlit_folium
 datetime
