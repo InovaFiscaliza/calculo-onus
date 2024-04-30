@@ -559,7 +559,7 @@ with aba4:
             
             with colC:
 
-                locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+                # locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
                 onus, FatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
                                    st.session_state.inp_AnoOnus, ROL, dfDados)
                 onusEmReais = (f'R$ {onus}')
