@@ -26,8 +26,8 @@ listaAno = list(range(2005, dt.date.today().year))
 
 @st.cache_data
 def uploadFiles():
-    dfAreaPrest_0 = pd.read_csv("C:/Users/onus/dados/df_Mun_UF_Area.csv", dtype=str)
-    dfBasePop_0 = pd.read_csv("C:/Users/onus/dados/pop_2014_2021.csv", dtype=str)
+    dfAreaPrest_0 = pd.read_csv("df_Mun_UF_Area.csv", dtype=str)
+    dfBasePop_0 = pd.read_csv("pop_2014_2021.csv", dtype=str)
     return dfAreaPrest_0, dfBasePop_0
 
 
@@ -461,7 +461,7 @@ with aba3:
             
             @st.cache_data
             def lerMapa(sessionUF):
-                mapa = gpd.read_file(f"C:/Users/yroar/Downloads/SHP_UFs/{sessionUF}.shp")
+                mapa = gpd.read_file(f"SHP_UFs/{sessionUF}.shp")
                 return mapa
             
             
@@ -517,10 +517,6 @@ with aba3:
                                    width=1200,
                                    height=600)
             
-            # POLGeoTermo.add_to(mapaFolium)
-            # POLGeo.add_to(mapaFolium)
-            #
-            # folium_static(mapaFolium, width=200, height=200)
     
     except Exception:
         pass
