@@ -155,7 +155,7 @@ def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
         
         resultadoOnusUF = resultadoOnusUF + (FatorFreq * FatorPopulacional * 0.02 * ROL_UF)
     
-    return resultadoOnusUF
+    return resultadoOnusUF, FatorFreq
 
 
 ## inicia o dataframe para carregamento dos termos
