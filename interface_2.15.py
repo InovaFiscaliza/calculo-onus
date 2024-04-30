@@ -523,7 +523,6 @@ with aba4:
             dfDados['popMun'] = dfDados['popMun'].astype(int)
             dfDados['popUF'] = dfDados['popUF'].astype(int)
             dfDados['coefPop'] = dfDados['popMun']/dfDados['popUF']
-            print(dfDados)
             
             st.subheader('Cálculo do ônus')
             st.divider()
