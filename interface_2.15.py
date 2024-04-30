@@ -574,10 +574,10 @@ with aba4:
                 
                 st.subheader('')
                 st.subheader('')
-                st.subheader(f'R$ {(onus[0])}')
+                st.subheader('R$ {:.2f}'.format(onus[0]))
                 st.subheader('')
                 st.subheader('')
-                st.subheader(f'Fator de Frequência {fatorFreq}')
+                st.subheader('Fator de Frequência {:.6f}'.format(fatorFreq))
                 st.subheader('')
         
         df_tabelaTermosAbaOnus = st.session_state.df_TermosPrg
