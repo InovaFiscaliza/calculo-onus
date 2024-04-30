@@ -5,6 +5,6 @@ pydeck
 streamlit
 folium
 geopandas
-
+locale
 streamlit_folium
 datetime
