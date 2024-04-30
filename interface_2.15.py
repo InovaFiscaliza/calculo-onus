@@ -558,16 +558,27 @@ with aba4:
             
             with colC:
 
-                locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+                # locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+                # onus, fatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
+                #                    st.session_state.inp_AnoOnus, ROL, dfDados)
+                # onusEmReais = locale.currency(onus)
+                # st.subheader('')
+                # st.subheader('')
+                # st.subheader(onusEmReais)
+                # st.subheader('')
+                # st.subheader('')
+                # st.subheader(f'Fator de Frequência {fatorFreq}')
+                
                 onus, fatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
                                    st.session_state.inp_AnoOnus, ROL, dfDados)
-                onusEmReais = locale.currency(onus)
+                
                 st.subheader('')
                 st.subheader('')
-                st.subheader(onusEmReais)
+                st.subheader(onus)
                 st.subheader('')
                 st.subheader('')
                 st.subheader(f'Fator de Frequência {fatorFreq}')
+                st.subheader('')
         
         df_tabelaTermosAbaOnus = st.session_state.df_TermosPrg
         df_tabelaTermosAbaOnusUF = df_tabelaTermosAbaOnus[df_tabelaTermosAbaOnus['UF'] == st.session_state.UF]
