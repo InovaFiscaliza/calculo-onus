@@ -559,27 +559,16 @@ with aba4:
             
             with colC:
 
-                # locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-                onus, FatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
+                locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+                onus, fatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
                                    st.session_state.inp_AnoOnus, ROL, dfDados)
-                onusEmReais = (f'R$ {onus}')
-                # onusEmReais = locale.currency(onus)
-
+                onusEmReais = locale.currency(onus)
                 st.subheader('')
                 st.subheader('')
                 st.subheader(onusEmReais)
-                st.subheader(f'Fator de Frequência {FatorFreq}')
-                
-                # pass
-                # locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-                # onus = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
-                #                    st.session_state.inp_AnoOnus, ROL, dfDados)
-                # # onusEmReais = locale.currency(onus)
-                # onusEmReais = (f'R$ {onus}')
-
-                # st.subheader('')
-                # st.subheader('')
-                # st.subheader(onusEmReais)
+                st.subheader('')
+                st.subheader('')
+                st.subheader(f'Fator de Frequência {fatorFreq}')
         
         df_tabelaTermosAbaOnus = st.session_state.df_TermosPrg
         df_tabelaTermosAbaOnusUF = df_tabelaTermosAbaOnus[df_tabelaTermosAbaOnus['UF'] == st.session_state.UF]
