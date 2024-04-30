@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import locale
 import geopandas as gpd
-from streamlit_folium import st_folium
+from streamlit-folium import st_folium
 import datetime as dt
 
 
