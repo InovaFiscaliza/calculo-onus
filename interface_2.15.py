@@ -3,8 +3,8 @@ import pandas as pd
 import streamlit as st
 import locale
 import geopandas as gpd
-# from streamlit_folium import st_folium
-from streamlit_folium import folium_static
+from streamlit_folium import st_folium
+# from streamlit_folium import folium_static
 import datetime as dt
 
 
@@ -501,14 +501,15 @@ with aba3:
                                                                                           "fillOpacity": 0.5,
                                                                                           'weight': 0.5})
             
-            # grupoMapa.add_child(POLGeoTermo)
-            # grupoMapa.add_child(POLGeo)
+            grupoMapa.add_child(POLGeoTermo)
+            grupoMapa.add_child(POLGeo)
             
-            # mostraMapa = st_folium(mapaFolium,
-            #                        feature_group_to_add=grupoMapa,
-            #                        zoom=4,
-            #                        width=1200,
-            #                        height=600)
+            st_folium(mapaFolium,
+                                   feature_group_to_add=grupoMapa,
+                                   zoom=4,
+                                   returned_objects=[],
+                                   width=1200,
+                                   height=600)
 
             POLGeoTermo.add_to(mapaFolium)
             POLGeo.add_to(mapaFolium)
