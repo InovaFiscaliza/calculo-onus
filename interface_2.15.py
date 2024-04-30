@@ -129,9 +129,7 @@ def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
     
     dfTermoOnus['BW_Freq'] = (dfTermoOnus['Banda'] / dfTermoOnus['Freq'])
     # print(dfTermoOnus)
-    
-    # dfTermoOnus.to_csv("C:/Users/yroar/Downloads/arquivos teste onus/dfOnus.csv", decimal=',')
-    
+        
     listaCodMunOnus = list(dfTermoOnus['codMun'].unique())  # gera lista de mun do ônus
     
     ################ Seleciona os demais termos para o cálculo de prorrogação ####################
@@ -142,9 +140,7 @@ def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
     dfTermoOutros = dfTermoOutros_UF[dfTermoOnus_UF['NumTermo'] != NumTermo]
     dfTermoOutros['BW_Freq'] = (dfTermoOutros['Banda'] / dfTermoOutros['Freq'])
     # print(dfTermoOutros)
-    
-    # dfTermoOutros.to_csv("C:/Users/yroar/Downloads/arquivos teste onus/dfOutros.csv", decimal=',')
-    
+        
     resultadoOnusUF = 0
     for codMunOnus in listaCodMunOnus:
         ### fator de proporcionalidade populacional
@@ -243,7 +239,6 @@ with aba1:
             dfAreaPopUF.drop_duplicates(inplace=True)
             dfAreaPopUF.drop('UF_x', axis=1, inplace=True)
             dfAreaPopUF.rename(columns={'UF_y': 'UF'}, inplace=True)
-            dfAreaPopUF.to_csv('C:/Users/onus/desenvolvimento/rascunho/dfAreaPopUF.csv')
             # print(dfAreaPopUF)
         ### seleciona a área de prestação
         
