@@ -6,7 +6,6 @@ import geopandas as gpd
 from streamlit_folium import st_folium
 import datetime as dt
 
-
 st.set_page_config(layout='wide')
 pd.options.mode.copy_on_write = True
 
@@ -27,8 +26,8 @@ listaAno = list(range(2005, dt.date.today().year))
 
 @st.cache_data
 def uploadFiles():
-    dfAreaPrest_0 = pd.read_csv("df_Mun_UF_Area.csv", dtype=str)
-    dfBasePop_0 = pd.read_csv("pop_2014_2021.csv", dtype=str)
+    dfAreaPrest_0 = pd.read_csv("C:/Users/onus/dados/df_Mun_UF_Area.csv", dtype=str)
+    dfBasePop_0 = pd.read_csv("C:/Users/onus/dados/pop_2014_2021.csv", dtype=str)
     return dfAreaPrest_0, dfBasePop_0
 
 
@@ -98,7 +97,7 @@ def geraDF_Final(
         DF_TERMOS_UF_APREST_AEXCL_MUNEXCL = DF_TERMOS_UF_APREST_AEXCL
 
     DF_TERMOS = DF_TERMOS_UF_APREST_AEXCL_MUNEXCL
-  
+    # print(DF_TERMOS_UF_APREST_AEXCL_MUNEXCL)
     
     DF_TERMOS['AreaExclusao'] = str(AExcl)
     DF_TERMOS['MunExclusao'] = str(MunExcl)
@@ -129,6 +128,9 @@ def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
     dfTermoOnus = dfTermoOnus_NumTermo[dfTermoOnus_NumTermo['AnoTermo'] == AnoTermo]
     
     dfTermoOnus['BW_Freq'] = (dfTermoOnus['Banda'] / dfTermoOnus['Freq'])
+    # print(dfTermoOnus)
+    
+    # dfTermoOnus.to_csv("C:/Users/yroar/Downloads/arquivos teste onus/dfOnus.csv", decimal=',')
     
     listaCodMunOnus = list(dfTermoOnus['codMun'].unique())  # gera lista de mun do ônus
     
@@ -139,11 +141,15 @@ def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
     dfTermoOutros_UF = dfTermoOutros_Entidade[dfTermoOnus_Entidade['UF'] == UF]
     dfTermoOutros = dfTermoOutros_UF[dfTermoOnus_UF['NumTermo'] != NumTermo]
     dfTermoOutros['BW_Freq'] = (dfTermoOutros['Banda'] / dfTermoOutros['Freq'])
-        
+    # print(dfTermoOutros)
+    
+    # dfTermoOutros.to_csv("C:/Users/yroar/Downloads/arquivos teste onus/dfOutros.csv", decimal=',')
+    
     resultadoOnusUF = 0
     for codMunOnus in listaCodMunOnus:
         ### fator de proporcionalidade populacional
         FatorPopulacional = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['coefPop'].unique()
+        # print(FatorPopulacional)
         NumeradorFreq = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['BW_Freq'].unique().sum()
         
         DenominadorFreq = NumeradorFreq + dfTermoOutros[dfTermoOutros['codMun'] == codMunOnus][
@@ -237,8 +243,8 @@ with aba1:
             dfAreaPopUF.drop_duplicates(inplace=True)
             dfAreaPopUF.drop('UF_x', axis=1, inplace=True)
             dfAreaPopUF.rename(columns={'UF_y': 'UF'}, inplace=True)
-            
-            
+            dfAreaPopUF.to_csv('C:/Users/onus/desenvolvimento/rascunho/dfAreaPopUF.csv')
+            # print(dfAreaPopUF)
         ### seleciona a área de prestação
         
         with dfTermoCol[5]:
@@ -325,7 +331,7 @@ with aba1:
             
             else:
                 dfAreaPrestacaoFinal = dfAreaPrest_menos_AreasExcl
-           
+            # print(dfAreaPrestacaoFinal)
         ################# fim do bloco de filtros ######################
         
         with dfTermoCol[8]:
@@ -455,8 +461,9 @@ with aba3:
             
             @st.cache_data
             def lerMapa(sessionUF):
-                mapa = gpd.read_file("SHP_UFs/{sessionUF}.shp")
+                mapa = gpd.read_file(f"C:/Users/yroar/Downloads/SHP_UFs/{sessionUF}.shp")
                 return mapa
+            
             
             mapa = lerMapa(st.session_state.inp_UFmapa)
             
@@ -502,13 +509,18 @@ with aba3:
             
             grupoMapa.add_child(POLGeoTermo)
             grupoMapa.add_child(POLGeo)
-            
-            st_folium(mapaFolium,
+
+            mostraMapa = st_folium(mapaFolium,
                                    feature_group_to_add=grupoMapa,
-                                   zoom=4,
                                    returned_objects=[],
+                                   zoom=4,
                                    width=1200,
                                    height=600)
+            
+            # POLGeoTermo.add_to(mapaFolium)
+            # POLGeo.add_to(mapaFolium)
+            #
+            # folium_static(mapaFolium, width=200, height=200)
     
     except Exception:
         pass
@@ -520,7 +532,7 @@ with aba4:
             dfDados['popMun'] = dfDados['popMun'].astype(int)
             dfDados['popUF'] = dfDados['popUF'].astype(int)
             dfDados['coefPop'] = dfDados['popMun']/dfDados['popUF']
-           
+            print(dfDados)
             
             st.subheader('Cálculo do ônus')
             st.divider()
