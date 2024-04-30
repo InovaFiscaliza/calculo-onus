@@ -4,7 +4,6 @@ import streamlit as st
 import locale
 import geopandas as gpd
 from streamlit_folium import st_folium
-# from streamlit_folium import folium_static
 import datetime as dt
 
 
@@ -510,11 +509,6 @@ with aba3:
                                    returned_objects=[],
                                    width=1200,
                                    height=600)
-
-            POLGeoTermo.add_to(mapaFolium)
-            POLGeo.add_to(mapaFolium)
-            
-            folium_static(mapaFolium)
     
     except Exception:
         pass
