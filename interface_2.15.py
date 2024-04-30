@@ -562,7 +562,9 @@ with aba4:
                 locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
                 onus = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
                                    st.session_state.inp_AnoOnus, ROL, dfDados)
-                onusEmReais = locale.currency(onus)
+                # onusEmReais = locale.currency(onus)
+                onusEmReais = (f'R$ {onus}')
+
                 st.subheader('')
                 st.subheader('')
                 st.subheader(onusEmReais)
