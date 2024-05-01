@@ -26,12 +26,12 @@ listaAno = list(range(2005, dt.date.today().year))
 
 @st.cache_data
 def uploadFiles():
-    dfAreaPrest_0 = pd.read_csv("df_Mun_UF_Area.csv", dtype=str)
-    dfBasePop_0 = pd.read_csv("pop_2014_2021.csv", dtype=str)
+    dfAreaPrest_0 = pd.read_csv("C:/Users/onus/dados/df_Mun_UF_Area.csv", dtype=str)
+    dfBasePop_0 = pd.read_csv("C:/Users/onus/dados/pop_2014_2021.csv", dtype=str)
     return dfAreaPrest_0, dfBasePop_0
 
 
-dfAreaPrest = uploadFiles()[0] # dataframe com a associação dos códigos de município com as áreas de prestação
+dfAreaPrest = uploadFiles()[0]  # dataframe com a associação dos códigos de município com as áreas de prestação
 dfBasePop = uploadFiles()[1]  # dataframe com os quantitativos populacionais associados aos códigos de município
 
 dfAreaPrest.drop('Unnamed: 0', inplace=True, axis=1)
@@ -40,7 +40,8 @@ dfBasePop.drop('Unnamed: 0', inplace=True, axis=1)
 ##### a função geraDF_Final é utilizada para associar o termos aos municipios das áres de prestação
 
 DF_TERMOS = pd.DataFrame(
-    columns=['AnoBase', 'Entidade', 'NumTermo', 'AnoTermo', 'UF', 'APrest', 'AExcl', 'MunExcl', 'FreqIni', 'FreqFin', 'Freq',
+    columns=['AnoBase', 'Entidade', 'NumTermo', 'AnoTermo', 'UF', 'APrest', 'AExcl', 'MunExcl', 'FreqIni', 'FreqFin',
+             'Freq',
              'Banda', 'Tipo'])
 
 
@@ -48,7 +49,7 @@ def geraDF_Final(
         AnoBase, Entidade, NumTermo, AnoTermo, UF, APrest, AExcl, MunExcl, FreqIni, FreqFin, Freq, BW, Tipo
 ):
     global DF_TERMOS
-
+    
     ### carrega os municípios do ano base e da UF
     
     DF_ANO_BASE = dfBasePop[dfBasePop['AnoBase'] == AnoBase]
@@ -61,41 +62,41 @@ def geraDF_Final(
     
     ### carrega os municípios da área de prestação
     DF_TERMOS_UF_APREST = DF_AREA_POP[DF_AREA_POP['AreaPrestacao'] == APrest]
-
+    
     ############# etapa para excluir os municípios das áeras de exclusão caso existam ####
-
+    
     if AExcl != []:
-
+        
         DFAreaExcl = pd.DataFrame()
         for NomeAreaExc in AExcl:
             #### gera o dataframe com as áreas de exclusão já com os municípios de exclusão
             DFAreaExcl = pd.concat(
                 [DFAreaExcl, DF_AREA_POP[DF_AREA_POP['AreaPrestacao'] == NomeAreaExc]])
-
+        
         ###### gera a lista de municípios a serem excluídos
         lista_AExcl_CodMUN = DFAreaExcl['codMun'].unique()
-
+        
         ###### exclui os municípios da área de prestação.
         DF_TERMOS_UF_APREST_AEXCL = DF_TERMOS_UF_APREST.loc[
             ~DF_TERMOS_UF_APREST['codMun'].isin(lista_AExcl_CodMUN)]
     else:
         ##### se não tiver áreas ou municípios de exclusão, o dataframe considera a área de prestação integral
         DF_TERMOS_UF_APREST_AEXCL = DF_TERMOS_UF_APREST
-
+    
     ############# etapa para excluir os municípios individualmente ####
-
+    
     if MunExcl != []:
         DFMunExcl = pd.DataFrame()
         for NomeMunExcl in MunExcl:
             DFMunExcl = pd.concat(
                 [DFMunExcl, DF_TERMOS_UF_APREST_AEXCL[DF_TERMOS_UF_APREST_AEXCL['Municipio'] == NomeMunExcl]])
-
+        
         lista_MunExcl_CodMUN_Excl = DFMunExcl['codMun'].unique()
         DF_TERMOS_UF_APREST_AEXCL_MUNEXCL = DF_TERMOS_UF_APREST_AEXCL.loc[
             ~DF_TERMOS_UF_APREST_AEXCL['codMun'].isin(lista_MunExcl_CodMUN_Excl)]
     else:
         DF_TERMOS_UF_APREST_AEXCL_MUNEXCL = DF_TERMOS_UF_APREST_AEXCL
-
+    
     DF_TERMOS = DF_TERMOS_UF_APREST_AEXCL_MUNEXCL
     # print(DF_TERMOS_UF_APREST_AEXCL_MUNEXCL)
     
@@ -110,37 +111,50 @@ def geraDF_Final(
     DF_TERMOS['Freq'] = Freq
     DF_TERMOS['Banda'] = BW
     DF_TERMOS['TIPO'] = Tipo
-
+    
     return DF_TERMOS
+
 
 ### Função para o cálculo do ônus ###
 
-def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
+def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnus):
     ### Gera os dataframes com Termo prorrogado e sem o Termo prorrogado para execução do cálculo dos coefientes.
     ################ Seleciona os dados do termo objeto do cálculo do ônus ####################
-    dfDados.drop_duplicates(inplace=True)
-    dfCountFreq = pd.DataFrame(dfDados.Freq.value_counts())
-    dfDadosCountFreq = dfDados.merge(dfCountFreq, how='inner', on='Freq')
+    
+    # print(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF)
+    
+    dfDadosOnus.drop_duplicates(inplace=True)
+    dfDadosOnusAnoBase = dfDadosOnus[dfDadosOnus['AnoBase'] == AnoBasePop]
+    
+    # print(dfDadosOnusAnoBase)
+    
+    dfCountFreq = pd.DataFrame(dfDadosOnusAnoBase.Freq.value_counts())
+    dfDadosCountFreq = dfDadosOnusAnoBase.merge(dfCountFreq, how='inner', on='Freq') # linha para informar contagem de frequência - auxiliar verificação
     dfTermoOnus_Entidade = dfDadosCountFreq[dfDadosCountFreq['Entidade'] == Entidade]
+    
+    # print(dfTermoOnus_Entidade)
     
     dfTermoOnus_UF = dfTermoOnus_Entidade[dfTermoOnus_Entidade['UF'] == UF]
     dfTermoOnus_NumTermo = dfTermoOnus_UF[dfTermoOnus_UF['NumTermo'] == NumTermo]
     dfTermoOnus = dfTermoOnus_NumTermo[dfTermoOnus_NumTermo['AnoTermo'] == AnoTermo]
     
-    dfTermoOnus['BW_Freq'] = (dfTermoOnus['Banda'] / dfTermoOnus['Freq'])
     # print(dfTermoOnus)
-        
+    
+    dfTermoOnus['BW_Freq'] = (dfTermoOnus['Banda'] / dfTermoOnus['Freq'])
+    
     listaCodMunOnus = list(dfTermoOnus['codMun'].unique())  # gera lista de mun do ônus
+    
+    # print(dfTermoOnus)
+    # print(listaCodMunOnus)
     
     ################ Seleciona os demais termos para o cálculo de prorrogação ####################
     
-    # dfTermoOutros_Entidade = dfDados[dfDados['Entidade'] == Entidade]
     dfTermoOutros_Entidade = dfDadosCountFreq[dfDadosCountFreq['Entidade'] == Entidade]
     dfTermoOutros_UF = dfTermoOutros_Entidade[dfTermoOnus_Entidade['UF'] == UF]
     dfTermoOutros = dfTermoOutros_UF[dfTermoOnus_UF['NumTermo'] != NumTermo]
     dfTermoOutros['BW_Freq'] = (dfTermoOutros['Banda'] / dfTermoOutros['Freq'])
-    # print(dfTermoOutros)
-        
+    
+    dfFatorFreqMun = pd.DataFrame()
     resultadoOnusUF = 0
     for codMunOnus in listaCodMunOnus:
         ### fator de proporcionalidade populacional
@@ -150,19 +164,30 @@ def calculaOnus(Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDados):
         
         DenominadorFreq = NumeradorFreq + dfTermoOutros[dfTermoOutros['codMun'] == codMunOnus][
             'BW_Freq'].unique().sum()
-        
         FatorFreq = NumeradorFreq / DenominadorFreq
         
         resultadoOnusUF = resultadoOnusUF + (FatorFreq * FatorPopulacional * 0.02 * ROL_UF)
+        
+        # print(dfTermoOnus)
+        nomeMun = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['Municipio'].unique()
+        
+        # print(nomeMun)
+        # print(FatorFreq)
+        
+        dfFFAux = pd.DataFrame({'Municipio':nomeMun, 'codMun': codMunOnus, 'fatorFreq': FatorFreq})
+        dfFatorFreqMun = pd.concat([dfFatorFreqMun, dfFFAux])
+        
+        # print(dfFatorFreqMun)
+        
     
-    return resultadoOnusUF, FatorFreq
+    return resultadoOnusUF[0], dfFatorFreqMun
 
 
 ## inicia o dataframe para carregamento dos termos
 
 if 'df_TermosPrg' not in st.session_state:
     df_TermosPrg = pd.DataFrame({
-        'AnoBase':[],
+        'AnoBase': [],
         'Entidade': [],
         'NumTermo': [],
         'AnoTermo': [],
@@ -181,7 +206,7 @@ if 'df_TermosPrg' not in st.session_state:
 
 def ad_dfTermoPrg():
     adLinha = pd.DataFrame({
-        'AnoBase':[st.session_state.input_anoBase],
+        'AnoBase': [st.session_state.input_anoBase],
         'Entidade': [st.session_state.input_entidade],
         'NumTermo': [st.session_state.input_NumTermo],
         'AnoTermo': [st.session_state.input_AnoTermo],
@@ -214,8 +239,7 @@ with aba1:
             
             # cria dataframe com a base populacional do ano selecionado de todo o país
             dfBasePopSel = dfBasePop[dfBasePop['AnoBase'] == st.session_state.input_anoBase]
-            listaUF = dfBasePopSel['UF'].unique() # cria lista das UFs
-            
+            listaUF = dfBasePopSel['UF'].unique()  # cria lista das UFs
         
         with dfTermoCol[1]:
             st.selectbox('Operadora', options=listaOP, key='input_entidade')
@@ -239,6 +263,7 @@ with aba1:
             dfAreaPopUF.drop_duplicates(inplace=True)
             dfAreaPopUF.drop('UF_x', axis=1, inplace=True)
             dfAreaPopUF.rename(columns={'UF_y': 'UF'}, inplace=True)
+            dfAreaPopUF.to_csv('C:/Users/onus/desenvolvimento/rascunho/dfAreaPopUF.csv')
             # print(dfAreaPopUF)
         ### seleciona a área de prestação
         
@@ -253,7 +278,7 @@ with aba1:
             # cria o dataframe com a área de prestação relativa a área da UF, que pode ser total ou parcial
             dfAreaPrestacaoSel = dfAreaPopUF[
                 dfAreaPopUF['AreaPrestacao'] == st.session_state.input_areaPrestacao]
-            
+        
         ########################################
         ### opção de seleção de áreas de exclusão
         ########################################
@@ -267,7 +292,7 @@ with aba1:
             else:
                 listaExcl_ini.remove('Toda UF')
                 listaExcl_ini.remove(st.session_state.input_areaPrestacao)
-
+            
             setAreaPrestacao = set(
                 dfAreaPrestacaoSel['codMun'])  # cria conjunto com os códigos de municípios area prest principal
             
@@ -292,10 +317,11 @@ with aba1:
                     dfAreaExcl = pd.concat(
                         [dfAreaExcl, dfAreaPopUF[dfAreaPopUF['AreaPrestacao'] == nomeAreaExc]])
                 
-                lista_CodMUN_Excl = dfAreaExcl['codMun'].unique() # gera a lista do municipios excluídos
+                lista_CodMUN_Excl = dfAreaExcl['codMun'].unique()  # gera a lista do municipios excluídos
                 
                 # gera o dataframe com a extração dos municípios excluídos conforme seleção das áreas de exclusão.
-                dfAreaPrest_menos_AreasExcl = dfAreaPrestacaoSel.loc[~dfAreaPrestacaoSel['codMun'].isin(lista_CodMUN_Excl)]
+                dfAreaPrest_menos_AreasExcl = dfAreaPrestacaoSel.loc[
+                    ~dfAreaPrestacaoSel['codMun'].isin(lista_CodMUN_Excl)]
             else:
                 dfAreaPrest_menos_AreasExcl = dfAreaPrestacaoSel
         
@@ -305,7 +331,7 @@ with aba1:
         
         with dfTermoCol[7]:
             
-            #gera a lista de município com base no resultado entre area de prestação e áreas de exclusão
+            # gera a lista de município com base no resultado entre area de prestação e áreas de exclusão
             
             if st.session_state.input_areaExcl != []:  # ser for sel area de excl, gerar lista municipios prest
                 listaMun_excl = dfAreaPrest_menos_AreasExcl['Municipio'].unique()
@@ -318,11 +344,13 @@ with aba1:
                 dfMunExcl = pd.DataFrame()
                 for nomeMunExcl in mun_excl:  # agrupa os municipios excluídos individualmente e monta um dataframe com os mun selecionados.
                     
-                    dfMunExcl = pd.concat([dfMunExcl, dfAreaPrest_menos_AreasExcl[dfAreaPrest_menos_AreasExcl['Municipio'] == nomeMunExcl]])
-                    
+                    dfMunExcl = pd.concat([dfMunExcl, dfAreaPrest_menos_AreasExcl[
+                        dfAreaPrest_menos_AreasExcl['Municipio'] == nomeMunExcl]])
+                
                 lista_dfMunExcl = dfMunExcl['Municipio'].unique()  # gera a lista de municípios a serem excluídos
                 # exclui os municípios da área de prestação
-                dfAreaPrestacaoFinal = dfAreaPrest_menos_AreasExcl.loc[~dfAreaPrest_menos_AreasExcl['Municipio'].isin(lista_dfMunExcl)]
+                dfAreaPrestacaoFinal = dfAreaPrest_menos_AreasExcl.loc[
+                    ~dfAreaPrest_menos_AreasExcl['Municipio'].isin(lista_dfMunExcl)]
             
             else:
                 dfAreaPrestacaoFinal = dfAreaPrest_menos_AreasExcl
@@ -344,7 +372,7 @@ with aba1:
         with dfTermoCol[11]:
             st.number_input('Banda', key='BW',
                             value=st.session_state.input_freqFinal - st.session_state.input_freqInicial, disabled=True)
-            
+        
         with dfTermoCol[12]:
             st.selectbox('Tipo', options=['ONUS', 'DEMAIS'], key='input_tipo')
         
@@ -456,7 +484,7 @@ with aba3:
             
             @st.cache_data
             def lerMapa(sessionUF):
-                mapa = gpd.read_file(f"SHP_UFs/{sessionUF}.shp")
+                mapa = gpd.read_file(f"C:/Users/yroar/Downloads/SHP_UFs/{sessionUF}.shp")
                 return mapa
             
             
@@ -504,7 +532,7 @@ with aba3:
             
             grupoMapa.add_child(POLGeoTermo)
             grupoMapa.add_child(POLGeo)
-
+            
             mostraMapa = st_folium(mapaFolium,
                                    feature_group_to_add=grupoMapa,
                                    returned_objects=[],
@@ -522,67 +550,69 @@ with aba4:
             dfDados = dfTermos_Atual.copy()
             dfDados['popMun'] = dfDados['popMun'].astype(int)
             dfDados['popUF'] = dfDados['popUF'].astype(int)
-            dfDados['coefPop'] = dfDados['popMun']/dfDados['popUF']
+            dfDados['coefPop'] = dfDados['popMun'] / dfDados['popUF']
+            # print(dfDados)
             
             st.subheader('Cálculo do ônus')
             st.divider()
-            colA, colB, colC, colD, colE = st.columns(5)
-            with colA:
-                listaEntidades = dfDados['Entidade'].unique()
-                Entidade = st.selectbox('Operadora', options=listaEntidades)
+            colA, colB, colC, colD, colE, colF = st.columns(6)
             
-            with colB:
-                dfEntidade = dfDados[dfDados['Entidade'] == Entidade]
-                listaUF_mostraMapa = dfEntidade['UF'].unique()
-                UF = st.selectbox('Estado', options=listaUF_mostraMapa, key='UF')
-                st.session_state['uf'] = UF
+            with colA: # seleciona o ano da base populacional
+                listaAnoBasePop = dfDados['AnoBase'].unique()
+                anobase = st.selectbox('Ano da Base Populacional', options=listaAnoBasePop, key='anoBasePop')
+                
+            with colB:  # seleciona a entidade
+                dfListaEntidadeAnoBase = dfDados[dfDados['AnoBase'] == st.session_state.anoBasePop]
+                listaEntidades = dfListaEntidadeAnoBase['Entidade'].unique()
+                Entidade = st.selectbox('Operadora', options=listaEntidades, key='entidadeOnus')
+
+            with colC:  # seleciona a UF
+                
+                dflistaEntidadeAnoBaseUF = dfListaEntidadeAnoBase[dfListaEntidadeAnoBase['Entidade'] == st.session_state.entidadeOnus]
+                listaEntidadesUF = dflistaEntidadeAnoBaseUF['UF'].unique()
+                anoBaseUF = st.selectbox('Estado', options=listaEntidadesUF, key='anoBaseUF')
             
-            with colC:
-                dfUF = dfEntidade[dfEntidade['UF'] == UF]
-                listaTermosEntidadeUF = dfUF['NumTermo'].unique()
+            with colD:  # Seleciona o Termo
+                dfListaEntidadeAnoBaseUFTermo = dflistaEntidadeAnoBaseUF[dflistaEntidadeAnoBaseUF['UF'] == st.session_state.anoBaseUF]
+                listaTermosEntidadeUF = dfListaEntidadeAnoBaseUFTermo['NumTermo'].unique()
                 termo_SEL = st.selectbox('Termo', options=listaTermosEntidadeUF, key='inp_TermoOnus')
+                
+            with colE:  # Seleciona o ano do Termo
+                dfListaEntidadeAnoBaseUFTermoAnoTermo = dfListaEntidadeAnoBaseUFTermo[dfListaEntidadeAnoBaseUFTermo['NumTermo'] == st.session_state.inp_TermoOnus]
+                listaEntidadeAnoBaseUFTermoAnoTermo = dfListaEntidadeAnoBaseUFTermoAnoTermo['AnoTermo'].unique()
+                anoTermoProrrogado = st.selectbox('Ano do Termo', options=listaEntidadeAnoBaseUFTermoAnoTermo, key='inp_AnoOnus')
             
-            with colD:
-                dfUFTermo = dfUF[dfUF['NumTermo'] == termo_SEL]
-                listaTermosEntidadeUF_Ano = dfUFTermo['AnoTermo'].unique()
-                anoTermoProrrogado = st.selectbox('Ano do Termo', options=listaTermosEntidadeUF_Ano, key='inp_AnoOnus')
-            
-            with colE:
+            with colF:  # Informa a ROL
                 ROL = st.number_input("Receita Operacional Líquida (ROL) da UF", value=1000000)
             
-            with colB:
+            with colB:  # Apresenta a identificação do termo que foi calculado o ônus
                 st.subheader('')
                 st.subheader('')
                 st.subheader(
                     f":abacus:ÔNUS - Termo {st.session_state.inp_TermoOnus}/{str(st.session_state.inp_AnoOnus).split('.')[0]}")
             
-            with colC:
-
-                # locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-                # onus, fatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
-                #                    st.session_state.inp_AnoOnus, ROL, dfDados)
-                # onusEmReais = locale.currency(onus)
-                # st.subheader('')
-                # st.subheader('')
-                # st.subheader(onusEmReais)
-                # st.subheader('')
-                # st.subheader('')
-                # st.subheader(f'Fator de Frequência {fatorFreq}')
+            with colC:  # Executa a rotina de cálculo do ônus por meio da função calculaOnus
                 
-                onus, fatorFreq = calculaOnus(Entidade, UF, str(st.session_state.inp_TermoOnus),
-                                   st.session_state.inp_AnoOnus, ROL, dfDados)
+                locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+                onus, dfFatorFreqMun = calculaOnus(st.session_state.anoBasePop,
+                                                   Entidade,
+                                                   UF,
+                                                   str(st.session_state.inp_TermoOnus),
+                                                   st.session_state.inp_AnoOnus,
+                                                   ROL,
+                                                   dfDados)
                 
+                onusEmReais = locale.currency(onus)
                 st.subheader('')
                 st.subheader('')
-                st.subheader('R$ {:.2f}'.format(onus[0]))
-                st.subheader('')
-                st.subheader('')
-                st.subheader('Fator de Frequência {:.6f}'.format(fatorFreq))
-                st.subheader('')
+                st.subheader(onusEmReais)
+               
         
         df_tabelaTermosAbaOnus = st.session_state.df_TermosPrg
-        df_tabelaTermosAbaOnusUF = df_tabelaTermosAbaOnus[df_tabelaTermosAbaOnus['UF'] == st.session_state.UF]
-        st.dataframe(df_tabelaTermosAbaOnusUF)
+        df_tabelaTermosAbaOnusAnoBase = df_tabelaTermosAbaOnus[df_tabelaTermosAbaOnus['AnoBase'] == st.session_state.anoBasePop]
+        df_tabelaTermosAbaOnusAnoBaseUF = df_tabelaTermosAbaOnusAnoBase[df_tabelaTermosAbaOnusAnoBase['UF'] == st.session_state.anoBaseUF]
+        st.dataframe(df_tabelaTermosAbaOnusAnoBaseUF)
+        st.dataframe(dfFatorFreqMun)
     except Exception:
         pass
 
