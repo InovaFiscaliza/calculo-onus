@@ -263,7 +263,6 @@ with aba1:
             dfAreaPopUF.drop_duplicates(inplace=True)
             dfAreaPopUF.drop('UF_x', axis=1, inplace=True)
             dfAreaPopUF.rename(columns={'UF_y': 'UF'}, inplace=True)
-            dfAreaPopUF.to_csv('C:/Users/onus/desenvolvimento/rascunho/dfAreaPopUF.csv')
             # print(dfAreaPopUF)
         ### seleciona a área de prestação
         
