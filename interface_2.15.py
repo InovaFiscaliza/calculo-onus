@@ -592,7 +592,6 @@ with aba4:
             
             with colC:  # Executa a rotina de cálculo do ônus por meio da função calculaOnus
                 
-                locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
                 onus, dfFatorFreqMun = calculaOnus(st.session_state.anoBasePop,
                                                    Entidade,
                                                    UF,
@@ -601,10 +600,14 @@ with aba4:
                                                    ROL,
                                                    dfDados)
                 
-                onusEmReais = locale.currency(onus)
                 st.subheader('')
                 st.subheader('')
-                st.subheader(onusEmReais)
+                st.subheader('R$ {:.2f}'.format(onus[0]))
+                st.subheader('')
+                st.subheader('')
+                st.subheader('Fator de Frequência {:.6f}'.format(fatorFreq))
+                st.subheader('')
+
                
         
         df_tabelaTermosAbaOnus = st.session_state.df_TermosPrg
