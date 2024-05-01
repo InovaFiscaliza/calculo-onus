@@ -604,9 +604,7 @@ with aba4:
                 st.subheader('')
                 st.subheader('R$ {:.2f}'.format(onus[0]))
                 st.subheader('')
-                st.subheader('')
-                st.subheader('Fator de Frequência {:.6f}'.format(fatorFreq))
-                st.subheader('')
+                
 
                
         
