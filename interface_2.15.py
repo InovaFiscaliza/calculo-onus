@@ -602,7 +602,7 @@ with aba4:
                 
                 st.subheader('')
                 st.subheader('')
-                st.subheader('R$ {:.2f}'.format(onus[0]))
+                st.subheader('R$ {:.2f}'.format(onus))
                 st.subheader('')
                 
 
