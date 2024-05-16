@@ -174,7 +174,7 @@ def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnu
         # print(nomeMun)
         # print(FatorFreq)
         
-        dfFFAux = pd.DataFrame({'Municipio':nomeMun, 'codMun': codMunOnus, 'fatorFreq': FatorFreq})
+        dfFFAux = pd.DataFrame({'Municipio':nomeMun, 'codMun': codMunOnus, 'fatorFreq': FatorFreq, 'fatorPop':FatorPopulacional})
         dfFatorFreqMun = pd.concat([dfFatorFreqMun, dfFFAux])
         
         # print(dfFatorFreqMun)
