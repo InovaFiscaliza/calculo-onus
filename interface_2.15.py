@@ -165,8 +165,10 @@ def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnu
         DenominadorFreq = NumeradorFreq + dfTermoOutros[dfTermoOutros['codMun'] == codMunOnus][
             'BW_Freq'].unique().sum()
         FatorFreq = NumeradorFreq / DenominadorFreq
+
+        onusPorMunicipio = FatorFreq * FatorPopulacional * 0.02 * ROL_UF
         
-        resultadoOnusUF = resultadoOnusUF + (FatorFreq * FatorPopulacional * 0.02 * ROL_UF)
+        resultadoOnusUF = resultadoOnusUF + (onusPorMunicipio)
         
         # print(dfTermoOnus)
         nomeMun = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['Municipio'].unique()
@@ -174,7 +176,9 @@ def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnu
         # print(nomeMun)
         # print(FatorFreq)
         
-        dfFFAux = pd.DataFrame({'Municipio':nomeMun, 'codMun': codMunOnus, 'fatorFreq': FatorFreq, 'fatorPop':FatorPopulacional})
+        dfFFAux = pd.DataFrame({'Municipio':nomeMun, 'codMun': codMunOnus,
+                                'fatorFreq': FatorFreq, 'fatorPop':FatorPopulacional,
+                                'onusMunicipio':onusPorMunicipio})
         dfFatorFreqMun = pd.concat([dfFatorFreqMun, dfFFAux])
         
         # print(dfFatorFreqMun)
