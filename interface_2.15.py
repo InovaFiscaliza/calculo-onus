@@ -125,6 +125,9 @@ def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnu
     
     dfDadosOnus.drop_duplicates(inplace=True)
     dfDadosOnusAnoBase = dfDadosOnus[dfDadosOnus['AnoBase'] == AnoBasePop]
+
+    popTotalPrest = dfDadosOnusAnoBase[['Municipio','popMun']].drop_duplicates()['popMun'].sum()
+
     
     # print(dfDadosOnusAnoBase)
     
@@ -158,7 +161,9 @@ def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnu
     resultadoOnusUF = 0
     for codMunOnus in listaCodMunOnus:
         ### fator de proporcionalidade populacional
-        FatorPopulacional = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['coefPop'].unique()
+        # FatorPopulacional = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['coefPop'].unique()
+        numFatorpopulacional = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['popMun'].unique()
+        FatorPopulacional = numFatorpopulacional/popTotalPrest
         # print(FatorPopulacional)
         NumeradorFreq = dfTermoOnus[dfTermoOnus['codMun'] == codMunOnus]['BW_Freq'].unique().sum()
         
