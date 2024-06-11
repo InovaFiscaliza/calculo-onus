@@ -9,7 +9,7 @@ import datetime as dt
 st.set_page_config(layout='wide')
 pd.options.mode.copy_on_write = True
 
-st.title("Cálculo do Ônus Bienal :vibration_mode:")
+st.title("Cálculo do Ônus Contratual :vibration_mode:")
 st.divider()
 df_AuxAreaExcl = pd.DataFrame()
 
@@ -235,7 +235,7 @@ with aba1:
             st.selectbox('Operadora', options=listaOP, key='input_entidade')
         
         with dfTermoCol[2]:
-            st.text_input('Numero do Termo', key='input_NumTermo', placeholder='Somente inteiros')
+            st.text_input('Numero do Termo', key='input_NumTermo', placeholder='Termo')
         
         with dfTermoCol[3]:
             st.selectbox('Ano do Termo', key='input_AnoTermo', options=listaAno)
