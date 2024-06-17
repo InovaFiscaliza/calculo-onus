@@ -10,7 +10,7 @@ st.set_page_config(layout='wide')
 pd.options.mode.copy_on_write = True
 
 st.title("Cálculo do Ônus Contratual :vibration_mode:")
-st.divider()
+# st.divider()
 df_AuxAreaExcl = pd.DataFrame()
 
 listaOP = ['ALGAR', 'BRISANET', 'CLARO', 'LIGGA TELECOM', 'LIGUE', 'SERCOMTEL', 'TIM', 'VIVO', 'WINITY']
