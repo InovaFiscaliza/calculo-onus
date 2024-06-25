@@ -593,7 +593,7 @@ with aba4:
                 st.subheader('')
                 st.subheader('R$ {:.2f}'.format(onus))
                 st.subheader('')
-                st.subheader(PopulacaoTotal)
+                # st.subheader(PopulacaoTotal)
                 
 
                
