@@ -170,7 +170,7 @@ def calculaOnus(AnoBasePop, Entidade, UF, NumTermo, AnoTermo, ROL_UF, dfDadosOnu
                                 'onusMunicipio':onusPorMunicipio})
         dfFatorFreqMun = pd.concat([dfFatorFreqMun, dfFFAux])
 
-    return resultadoOnusUF[0], dfFatorFreqMun
+    return resultadoOnusUF[0], dfFatorFreqMun, popTotalPrest
 
 
 ## inicia o dataframe para carregamento dos termos
@@ -571,7 +571,7 @@ with aba4:
                 anoTermoProrrogado = st.selectbox('Ano do Termo', options=listaEntidadeAnoBaseUFTermoAnoTermo, key='inp_AnoOnus')
             
             with colF:  # Informa a ROL
-                ROL = st.number_input("Receita Operacional Líquida (ROL) da UF", value=1000000)
+                ROL = st.number_input("Receita Operacional Líquida (ROL) da UF", value=1000000.00)
             
             with colB:  # Apresenta a identificação do termo que foi calculado o ônus
                 st.subheader('')
@@ -581,7 +581,7 @@ with aba4:
             
             with colC:  # Executa a rotina de cálculo do ônus por meio da função calculaOnus
                 
-                onus, dfFatorFreqMun = calculaOnus(st.session_state.anoBasePop,
+                onus, dfFatorFreqMun, PopulacaoTotal = calculaOnus(st.session_state.anoBasePop,
                                                    Entidade,
                                                    UF,
                                                    str(st.session_state.inp_TermoOnus),
@@ -593,6 +593,7 @@ with aba4:
                 st.subheader('')
                 st.subheader('R$ {:.2f}'.format(onus))
                 st.subheader('')
+                st.subheader(PopulacaoTotal)
                 
 
                
