@@ -13,7 +13,7 @@ st.title("Cálculo do Ônus Contratual :vibration_mode:")
 st.divider()
 df_AuxAreaExcl = pd.DataFrame()
 
-listaOP = ['ALGAR', 'BRISANET', 'CLARO', 'LIGGA TELECOM', 'LIGUE', 'SERCOMTEL', 'TIM', 'VIVO', 'WINITY']
+listaOP = ['ALGAR', 'BRISANET', 'CLARO', 'LIGGA TELECOM', 'LIGUE','OI','SERCOMTEL', 'TIM', 'VIVO', 'WINITY']
 
 listaAno = list(range(2005, dt.date.today().year))
 
