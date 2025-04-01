@@ -5,8 +5,12 @@ import datetime as dt
 from streamlit_folium import st_folium
 from data_processor import DataProcessor
 
-# Initialize the data processor
+# In app.py, add the import for OnusCalculator
+from calculations import OnusCalculator
+
+# Initialize the data processor and calculator
 data_processor = DataProcessor()
+onus_calculator = OnusCalculator(data_processor)
 
 # Configure the page
 st.set_page_config(layout='wide')
@@ -267,7 +271,7 @@ with aba3:
                             no_touch=True,
                             tiles='openstreetmap',
                             control_scale=True,
-                            crs='EPSG3857',
+                            crs='EPSG:3857',
                             zoom_start=4,
                             key='mapaBase',
                             prefer_canvas=False,
@@ -380,22 +384,43 @@ with aba4:
                         f":abacus:ÔNUS - Termo {st.session_state.inp_TermoOnus}/{str(st.session_state.inp_AnoOnus).split('.')[0]}")
                 
                 with colC:
-                    # Calculate onus
-                    onus, df_factors, population_total = data_processor.calculate_onus(
+                    # Validate inputs
+                    is_valid, error_message = onus_calculator.validate_calculation_inputs(
                         st.session_state.anoBasePop,
                         st.session_state.entidadeOnus,
                         st.session_state.anoBaseUF,
                         st.session_state.inp_TermoOnus,
                         st.session_state.inp_AnoOnus,
-                        rol,
-                        df_data
+                        rol
                     )
                     
-                    # Display result
-                    st.subheader('')
-                    st.subheader('')
-                    st.subheader('R$ {:.2f}'.format(onus))
-                    st.subheader('')
+                    if is_valid:
+                        # Calculate onus using the calculator
+                        onus, df_factors, population_total = onus_calculator.calculate_onus(
+                            st.session_state.anoBasePop,
+                            st.session_state.entidadeOnus,
+                            st.session_state.anoBaseUF,
+                            st.session_state.inp_TermoOnus,
+                            st.session_state.inp_AnoOnus,
+                            rol,
+                            df_data
+                        )
+                        
+                        # Display formatted result
+                        st.subheader('')
+                        st.subheader('')
+                        st.subheader(onus_calculator.format_onus_result(onus))
+                        st.subheader('')
+                        
+                        # Get and display summary statistics
+                        if stats := onus_calculator.get_summary_statistics(df_factors):
+                            with st.expander("Estatísticas do cálculo"):
+                                st.write(f"Total de municípios: {stats['total_municipalities']}")
+                                st.write(f"Ônus máximo por município: {onus_calculator.format_onus_result(stats['max_onus'])}")
+                                st.write(f"Ônus mínimo por município: {onus_calculator.format_onus_result(stats['min_onus'])}")
+                                st.write(f"Ônus médio por município: {onus_calculator.format_onus_result(stats['avg_onus'])}")
+                    else:
+                        st.error(error_message)
                 
                 # Display terms table
                 df_terms_onus = st.session_state.df_TermosPrg
@@ -404,7 +429,9 @@ with aba4:
                 st.dataframe(df_terms_onus_state)
                 
                 # Display factors table
-                st.dataframe(df_factors)
+                if 'df_factors' in locals() and not df_factors.empty:
+                    st.subheader("Fatores por Município")
+                    st.dataframe(df_factors)
             else:
                 st.info("Adicione termos na aba 'Cadastro/Carregamento' para calcular o ônus.")
     except Exception as e:
