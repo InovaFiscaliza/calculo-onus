@@ -1,1 +1,5 @@
 .streamlit/
+.vscode/
+.venv/
+__pycache__/
+.ipynb_checkpoints/
