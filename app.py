@@ -18,6 +18,28 @@ st.title("Cálculo do Ônus Contratual :vibration_mode:")
 st.divider()
 
 # Initialize session state for storing terms
+if 'input_anoBase' not in st.session_state:
+    st.session_state.input_anoBase = None
+if 'input_entidade' not in st.session_state:
+    st.session_state.input_entidade = None
+if 'input_NumTermo' not in st.session_state:
+    st.session_state.input_NumTermo = None
+if 'input_AnoTermo' not in st.session_state:
+    st.session_state.input_AnoTermo = None
+if 'input_UF' not in st.session_state:
+    st.session_state.input_UF = None
+if 'input_areaPrestacao' not in st.session_state:
+    st.session_state.input_areaPrestacao = None
+if 'input_areaExcl' not in st.session_state:
+    st.session_state.input_areaExcl = None
+if 'input_munExclusao' not in st.session_state:
+    st.session_state.input_munExclusao = None
+if 'input_freqInicial' not in st.session_state:
+    st.session_state.input_freqInicial = None
+if 'input_freqFinal' not in st.session_state:
+    st.session_state.input_freqFinal = None
+if 'input_tipo' not in st.session_state:
+    st.session_state.input_tipo = None
 
 if 'df_TermosPrg' not in st.session_state:
     st.session_state.df_TermosPrg = pd.DataFrame({
