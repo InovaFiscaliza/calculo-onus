@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 import folium
 from streamlit_folium import st_folium
 import datetime as dt
@@ -82,7 +81,7 @@ class UIComponents:
                     st.session_state.input_UF,
                     st.session_state.input_areaPrestacao,
                 )
-                areasExcl = st.multiselect(
+                st.multiselect(
                     "Areas de Exclusão", options=listaAreasExcl, key="input_areaExcl"
                 )
 
@@ -102,7 +101,7 @@ class UIComponents:
                 )
 
                 listaMun_excl = df_after_exclusions["Municipio"].unique()
-                mun_excl = st.multiselect(
+                st.multiselect(
                     "Exclusao de Municipios",
                     options=listaMun_excl,
                     key="input_munExclusao",
@@ -141,9 +140,7 @@ class UIComponents:
 
             # Submit button
             with dfTermoCol[0]:
-                submitted = st.button("Aplicar", key="buttonTermo")
-
-                if submitted:
+                if st.button("Aplicar", key="buttonTermo"):
                     return {
                         "AnoBase": st.session_state.input_anoBase,
                         "Entidade": st.session_state.input_entidade,
@@ -176,7 +173,7 @@ class UIComponents:
         df_terms_copy = df_terms.copy()
         df_terms_copy.reset_index(drop=True, inplace=True)
 
-        edited_df = st.data_editor(
+        st.data_editor(
             df_terms_copy,
             num_rows="dynamic",
             key="dfTermoFinal",
