@@ -1,6 +1,9 @@
 import pandas as pd
 import geopandas as gpd
 
+AREA_PREST = "df_Mun_UF_Area.csv"
+BASE_POP = "pop_2014_2022.csv"
+
 
 class DataProcessor:
     def __init__(self):
@@ -12,14 +15,8 @@ class DataProcessor:
     def load_data(self):
         """Load the necessary data files"""
         try:
-            self.dfAreaPrest = pd.read_csv("df_Mun_UF_Area.csv", dtype=str)
-            self.dfBasePop = pd.read_csv("pop_2014_2021.csv", dtype=str)
-
-            # Clean up dataframes
-            if "Unnamed: 0" in self.dfAreaPrest.columns:
-                self.dfAreaPrest.drop("Unnamed: 0", inplace=True, axis=1)
-            if "Unnamed: 0" in self.dfBasePop.columns:
-                self.dfBasePop.drop("Unnamed: 0", inplace=True, axis=1)
+            self.dfAreaPrest = pd.read_csv(AREA_PREST, dtype="string")
+            self.dfBasePop = pd.read_csv(BASE_POP, dtype="string")
 
             return True
         except Exception as e:
