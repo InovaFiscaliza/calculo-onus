@@ -1,8 +1,11 @@
+-- Active: 1732746693311@@127.0.0.1@5432
+from pathlib import Path
 import pandas as pd
 import geopandas as gpd
 
-AREA_PREST = "df_Mun_UF_Area.csv"
-BASE_POP = "pop_2014_2022.csv"
+ROOT = Path(__file__).parent
+AREA_PREST = ROOT / "data/df_Mun_UF_Area.csv"
+BASE_POP = ROOT / "data/pop_2014_2024.csv"
 
 
 class DataProcessor:
@@ -25,7 +28,7 @@ class DataProcessor:
 
     def get_unique_years(self):
         """Get list of unique years from population data"""
-        return list(self.dfBasePop["AnoBase"].unique())
+        return self.dfBasePop["AnoBase"].unique().tolist()
 
     def get_operators_list(self):
         """Get list of operators"""
@@ -86,14 +89,11 @@ class DataProcessor:
         df_main_area = self.get_service_area_data(year, state, main_service_area)
 
         # Get all areas except the main one and 'Toda UF'
-        all_areas = list(df_area_pop["AreaPrestacao"].unique())
-        if "Toda UF" in all_areas:
-            all_areas.remove("Toda UF")
-        if main_service_area in all_areas and main_service_area != "Toda UF":
-            all_areas.remove(main_service_area)
+        exclude = ["Toda UF", main_service_area]
+        all_areas = [x for x in df_area_pop["AreaPrestacao"].unique() if x not in exclude]
 
         # Create set of municipalities in the main service area
-        main_area_mun_codes = set(df_main_area["codMun"])
+        main_area_mun_codes = df_main_area["codMun"].unique()
 
         # Find eligible exclusion areas (those that are subsets of the main area)
         eligible_areas = []
