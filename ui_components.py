@@ -1,7 +1,7 @@
 import streamlit as st
 import folium
 from streamlit_folium import st_folium
-import datetime as dt
+from datetime import datetime as dt
 
 
 class UIComponents:
@@ -55,7 +55,7 @@ class UIComponents:
 
             # Term year
             with dfTermoCol[3]:
-                listaAno = list(range(2005, dt.date.today().year))
+                listaAno = list(range(2005, dt.now().year))
                 st.selectbox("Ano do Termo", key="input_AnoTermo", options=listaAno)
 
             # State selection
@@ -467,7 +467,7 @@ class UIComponents:
     @staticmethod
     def render_terms_filter(df_terms, year, state):
         """
-        Render a filtered view of terms
+        Render an editable filtered view of terms
 
         Args:
             df_terms: DataFrame with terms
@@ -482,7 +482,20 @@ class UIComponents:
         if state:
             df_terms_filtered = df_terms_filtered[df_terms_filtered["UF"] == state]
 
-        st.dataframe(df_terms_filtered)
+        # Use data_editor instead of dataframe
+        edited_df = st.data_editor(
+            df_terms_filtered,
+            num_rows="dynamic",
+            use_container_width=True,
+            key="terms_editor",
+        )
+
+        # Check for deleted rows
+        if len(edited_df) < len(df_terms_filtered):
+            deleted_indices = set(df_terms_filtered.index) - set(edited_df.index)
+            return list(deleted_indices)
+
+        return None
 
     @staticmethod
     def render_error_message(message):
