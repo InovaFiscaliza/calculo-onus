@@ -1,4 +1,3 @@
--- Active: 1732746693311@@127.0.0.1@5432
 from pathlib import Path
 import pandas as pd
 import geopandas as gpd
@@ -90,10 +89,12 @@ class DataProcessor:
 
         # Get all areas except the main one and 'Toda UF'
         exclude = ["Toda UF", main_service_area]
-        all_areas = [x for x in df_area_pop["AreaPrestacao"].unique() if x not in exclude]
+        all_areas = [
+            x for x in df_area_pop["AreaPrestacao"].unique() if x not in exclude
+        ]
 
         # Create set of municipalities in the main service area
-        main_area_mun_codes = df_main_area["codMun"].unique()
+        main_area_mun_codes = set(df_main_area["codMun"])
 
         # Find eligible exclusion areas (those that are subsets of the main area)
         eligible_areas = []
@@ -101,10 +102,7 @@ class DataProcessor:
             df_area = df_area_pop[df_area_pop["AreaPrestacao"] == area]
             area_mun_codes = set(df_area["codMun"])
 
-            if (
-                area_mun_codes.issubset(main_area_mun_codes)
-                and area_mun_codes != main_area_mun_codes
-            ):
+            if area_mun_codes < main_area_mun_codes:
                 eligible_areas.append(area)
 
         return eligible_areas
