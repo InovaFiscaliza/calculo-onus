@@ -3,6 +3,7 @@ import streamlit as st
 from data_processor import DataProcessor
 from calculations import OnusCalculator
 from ui_components import UIComponents
+import io
 
 # Initialize components
 data_processor = DataProcessor()
@@ -32,11 +33,60 @@ if "df_TermosPrg" not in st.session_state:
         }
     )
 
+# Define the expected columns for validation
+EXPECTED_COLUMNS = [
+    "AnoBase",
+    "Entidade",
+    "NumTermo",
+    "AnoTermo",
+    "UF",
+    "areaPrestacao",
+    "areaExclusao",
+    "munExclusao",
+    "freqInicial",
+    "freqFinal",
+    "Freq",
+    "Banda",
+    "Tipo",
+]
+
 # Create tabs
 aba1, aba2, aba3, aba4 = ui.create_tabs()
 
 # Tab 1: Registration and Loading
 with aba1:
+    # Add CSV upload option
+    st.subheader("Carregar dados de um arquivo CSV")
+    uploaded_file = st.file_uploader("Escolha um arquivo CSV", type="csv")
+
+    if uploaded_file is not None:
+        try:
+            # Read the CSV file
+            df_upload = pd.read_csv(uploaded_file)
+
+            # Validate columns
+            missing_columns = [
+                col for col in EXPECTED_COLUMNS if col not in df_upload.columns
+            ]
+
+            if missing_columns:
+                st.error(
+                    f"O arquivo CSV não contém as seguintes colunas obrigatórias: {', '.join(missing_columns)}"
+                )
+            else:
+                # Keep only the expected columns
+                df_upload = df_upload[EXPECTED_COLUMNS]
+
+                # Ask for confirmation before replacing
+                if st.button("Substituir dados existentes com o arquivo CSV"):
+                    st.session_state.df_TermosPrg = df_upload
+                    ui.render_success_message("Dados carregados com sucesso!")
+        except Exception as e:
+            st.error(f"Erro ao processar o arquivo CSV: {e}")
+
+    st.divider()
+    st.subheader("Ou adicione termos manualmente")
+
     if form_data := ui.render_term_form(data_processor):
         new_term = pd.DataFrame([form_data])
         st.session_state.df_TermosPrg = pd.concat(
@@ -141,9 +191,15 @@ with aba4:
                     # Render result
                     ui.render_onus_result(onus, df_factors, population_total)
 
-                    # Display filtered terms
+                    # Display filtered terms with ability to delete rows
                     st.subheader("Termos para a UF selecionada")
-                    ui.render_terms_filter(st.session_state.df_TermosPrg, year, state)
+                    if deleted_indices := ui.render_terms_filter(
+                        st.session_state.df_TermosPrg, year, state
+                    ):
+                        st.session_state.df_TermosPrg.drop(
+                            deleted_indices, inplace=True
+                        )
+                        st.experimental_rerun()
                 else:
                     ui.render_error_message(error_message)
             else:
