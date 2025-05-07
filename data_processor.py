@@ -36,11 +36,19 @@ class DataProcessor:
             "ALGAR",
             "BRISANET",
             "CLARO",
+            "CLOUD2U",
+            "COPEL",
+            "COZANI",
+            "GARLIAVA",
             "LIGGA TELECOM",
             "LIGUE",
+            "NEXTEL",
             "OI",
+            "OPTIONS",
             "SERCOMTEL",
+            "TELEFONICA",
             "TIM",
+            "TPA",
             "VIVO",
             "WINITY",
         ]
@@ -74,10 +82,6 @@ class DataProcessor:
         )
         df_merged.drop_duplicates(inplace=True)
 
-        # if "UF_x" in df_merged.columns and "UF_y" in df_merged.columns:
-        #     df_merged.drop("UF_x", axis=1, inplace=True)
-        #     df_merged.rename(columns={"UF_y": "UF"}, inplace=True)
-
         return df_merged
 
     def get_service_area_data(self, year, state, service_area):
@@ -108,7 +112,7 @@ class DataProcessor:
             if area_mun_codes < main_area_mun_codes:
                 eligible_areas.append(area)
 
-        return eligible_areas
+        return ",".join(eligible_areas)
 
     def apply_exclusion_areas(self, df_service_area, exclusion_areas, year, state):
         """Apply exclusion areas to a service area dataframe"""
