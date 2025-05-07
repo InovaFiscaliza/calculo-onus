@@ -186,7 +186,7 @@ with aba3:
 # Tab 4: Onus Calculation
 with aba4:
     # try:
-    with st.container(height=450):
+    with st.container():
         # Only show calculation controls if terms have been added
         if (
             "dfTermos_Atual" in st.session_state
