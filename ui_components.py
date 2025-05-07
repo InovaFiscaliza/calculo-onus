@@ -110,10 +110,10 @@ class UIComponents:
 
             # Frequency inputs
             with dfTermoCol[8]:
-                st.number_input("Frequencia Incial", key="input_freqInicial")
+                st.number_input("Frequência Inicial(MHz)", key="input_freqInicial")
 
             with dfTermoCol[9]:
-                st.number_input("Frequência Final", key="input_freqFinal")
+                st.number_input("Frequência Final(MHz)", key="input_freqFinal")
 
             with dfTermoCol[10]:
                 freq_central = (
@@ -133,7 +133,7 @@ class UIComponents:
                     st.session_state.input_freqFinal
                     - st.session_state.input_freqInicial
                 )
-                st.number_input("Banda", key="BW", value=bandwidth, disabled=True)
+                st.number_input("Banda(MHz)", key="BW", value=bandwidth, disabled=True)
 
             # Term type
             with dfTermoCol[12]:
@@ -149,8 +149,8 @@ class UIComponents:
                         "AnoTermo": st.session_state.input_AnoTermo,
                         "UF": st.session_state.input_UF,
                         "areaPrestacao": st.session_state.input_areaPrestacao,
-                        "areaExclusao": ",".join(st.session_state.input_areaExcl),
-                        "munExclusao": ",".join(st.session_state.input_munExclusao),
+                        "areaExclusao": ", ".join(st.session_state.input_areaExcl),
+                        "munExclusao": ", ".join(st.session_state.input_munExclusao),
                         "freqInicial": st.session_state.input_freqInicial,
                         "freqFinal": st.session_state.input_freqFinal,
                         "Freq": freq_central,
