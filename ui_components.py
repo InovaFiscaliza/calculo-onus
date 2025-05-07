@@ -16,7 +16,6 @@ class UIComponents:
         """Configure the page layout and title"""
         st.set_page_config(layout="wide")
         st.title("Cálculo do Ônus Contratual :vibration_mode:")
-        st.divider()
 
     @staticmethod
     def create_tabs():
@@ -150,8 +149,8 @@ class UIComponents:
                         "AnoTermo": st.session_state.input_AnoTermo,
                         "UF": st.session_state.input_UF,
                         "areaPrestacao": st.session_state.input_areaPrestacao,
-                        "areaExclusao": st.session_state.input_areaExcl,
-                        "munExclusao": st.session_state.input_munExclusao,
+                        "areaExclusao": ",".join(st.session_state.input_areaExcl),
+                        "munExclusao": ",".join(st.session_state.input_munExclusao),
                         "freqInicial": st.session_state.input_freqInicial,
                         "freqFinal": st.session_state.input_freqFinal,
                         "Freq": freq_central,

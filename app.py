@@ -62,41 +62,42 @@ aba1, aba2, aba3, aba4 = ui.create_tabs()
 
 # Tab 1: Registration and Loading
 with aba1:
-    # Add CSV upload option
-    st.subheader("Carregar dados de um arquivo CSV")
-    uploaded_file = st.file_uploader("Escolha um arquivo CSV", type="csv")
+    with st.container():
+        # Add CSV upload option
+        st.subheader("Carregar dados de um arquivo CSV")
+        uploaded_file = st.file_uploader("Escolha um arquivo CSV", type="csv")
 
-    if uploaded_file is not None:
-        try:
-            # Read the CSV file
-            df_upload = pd.read_csv(uploaded_file)
+        if uploaded_file is not None:
+            try:
+                # Read the CSV file
+                df_upload = pd.read_csv(uploaded_file)
 
-            if missing_columns := [
-                col for col in EXPECTED_COLUMNS if col not in df_upload.columns
-            ]:
-                st.error(
-                    f"O arquivo CSV não contém as seguintes colunas obrigatórias: {', '.join(missing_columns)}"
-                )
-            else:
-                # Keep only the expected columns
-                df_upload = df_upload[EXPECTED_COLUMNS]
+                if missing_columns := [
+                    col for col in EXPECTED_COLUMNS if col not in df_upload.columns
+                ]:
+                    st.error(
+                        f"O arquivo CSV não contém as seguintes colunas obrigatórias: {', '.join(missing_columns)}"
+                    )
+                else:
+                    # Keep only the expected columns
+                    df_upload = df_upload[EXPECTED_COLUMNS]
 
-                # Store the CSV data temporarily
-                st.session_state.csv_data = df_upload.astype("string")
+                    # Store the CSV data temporarily
+                    st.session_state.csv_data = df_upload.astype("string")
 
-                # Show the replace button
-                if st.button("Carregar dados do arquivo CSV"):
-                    # If dataframe is empty, no need for confirmation
-                    if st.session_state.df_TermosPrg.empty:
-                        st.session_state.df_TermosPrg = st.session_state.csv_data
-                        st.session_state.csv_data = None
-                        ui.render_success_message("Dados carregados com sucesso!")
-                        st.rerun()
-                    else:
-                        # Set the confirmation flag if there's existing data
-                        st.session_state.show_confirmation = True
-        except Exception as e:
-            st.error(f"Erro ao processar o arquivo CSV: {e}")
+                    # Show the replace button
+                    if st.button("Carregar dados do arquivo CSV"):
+                        # If dataframe is empty, no need for confirmation
+                        if st.session_state.df_TermosPrg.empty:
+                            st.session_state.df_TermosPrg = st.session_state.csv_data
+                            st.session_state.csv_data = None
+                            ui.render_success_message("Dados carregados com sucesso!")
+                            st.rerun()
+                        else:
+                            # Set the confirmation flag if there's existing data
+                            st.session_state.show_confirmation = True
+            except Exception as e:
+                st.error(f"Erro ao processar o arquivo CSV: {e}")
 
     # Show confirmation dialog if needed
     if st.session_state.show_confirmation:
@@ -120,7 +121,7 @@ with aba1:
                 st.rerun()
 
     st.divider()
-    st.subheader("Ou adicione termos manualmente")
+    st.subheader("Adicionar termos manualmente")
 
     if form_data := ui.render_term_form(data_processor):
         new_term = pd.DataFrame([form_data])
@@ -135,15 +136,21 @@ with aba1:
     # Generate final dataframe for all terms
     if not st.session_state.df_TermosPrg.empty:
         st.session_state.df_TermosPrg.fillna("", inplace=True)
-        dfTermos_Atual = pd.DataFrame()
+        # dfTermos_Atual = pd.DataFrame()
 
-        for i in list(st.session_state.df_TermosPrg.index):
-            term = st.session_state.df_TermosPrg.loc[i]
-            df_term = data_processor.generate_final_df(term)
-            dfTermos_Atual = pd.concat([dfTermos_Atual, df_term])
+        # for i in list(st.session_state.df_TermosPrg.index):
+        #     term = st.session_state.df_TermosPrg.loc[i]
+        #     df_term = data_processor.generate_final_df(term)
+        #     dfTermos_Atual = pd.concat([dfTermos_Atual, df_term])
+        st.session_state.dfTermos_Atual = pd.concat(
+            [
+                data_processor.generate_final_df(term)
+                for _, term in st.session_state.df_TermosPrg.iterrows()
+            ],
+            ignore_index=True,
+            copy=False,
+        ).astype("string")
 
-        # Store in session state for use in other tabs
-        st.session_state.dfTermos_Atual = dfTermos_Atual
 
 # Tab 2: Tables
 with aba2:
