@@ -2,6 +2,8 @@ import streamlit as st
 import folium
 from streamlit_folium import st_folium
 from datetime import datetime as dt
+import numpy as np
+from pathlib import Path
 
 
 class UIComponents:
@@ -236,14 +238,16 @@ class UIComponents:
 
                 # Format frequency range for display
                 df_area_map_freq = df_area_map.copy()
-                df_area_map_freq["FreqIni"] = df_area_map["FreqIni"].apply(
-                    lambda x: str(x)
+                df_area_map_freq["freqInicial"] = df_area_map["freqInicial"].astype(
+                    "string"
                 )
-                df_area_map_freq["FreqFin"] = df_area_map["FreqFin"].apply(
-                    lambda x: str(x)
+                df_area_map_freq["freqFinal"] = df_area_map["freqFinal"].astype(
+                    "string"
                 )
                 df_area_map_freq["Faixa"] = (
-                    df_area_map_freq["FreqIni"] + " - " + df_area_map_freq["FreqFin"]
+                    df_area_map_freq["freqInicial"]
+                    + " - "
+                    + df_area_map_freq["freqFinal"]
                 )
 
             with col35:
@@ -282,7 +286,7 @@ class UIComponents:
 
         try:
             # Load map data
-            map_data = gpd.read_file(f"SHP_UFs/{state}.shp")
+            map_data = gpd.read_file(Path(__file__).parent / f"SHP_UFs/{state}.shp")
 
             if map_data is not None:
                 # Create GeoDataFrame
@@ -415,9 +419,7 @@ class UIComponents:
 
         with colB:
             # Display term identification
-            st.subheader("")
-            st.subheader("")
-            st.subheader(f":abacus:ÔNUS - Termo {term}/{str(term_year).split('.')[0]}")
+            st.subheader(f":abacus: ÔNUS - Termo {term}/{str(term_year).split('.')[0]}")
 
         return year, entity, state, term, term_year, rol
 
@@ -431,10 +433,7 @@ class UIComponents:
             df_factors: DataFrame with municipality factors
             population_total: Total population
         """
-        st.subheader("")
-        st.subheader("")
-        st.subheader("R$ {:.2f}".format(onus_value))
-        st.subheader("")
+        st.subheader(f"R$ {np.round(onus_value.item(), 2)}")
 
         # Display factors table with formatting
         if not df_factors.empty:
@@ -456,12 +455,12 @@ class UIComponents:
             with st.expander("Estatísticas do cálculo"):
                 st.write(f"Total de municípios: {len(df_factors)}")
                 st.write(f"População total: {population_total:,}".replace(",", "."))
-                st.write(f"Ônus total: R$ {onus_value:.2f}")
+                st.write(f"Ônus total: R$ {onus_value}")
                 st.write(
-                    f"Ônus médio por município: R$ {(onus_value / len(df_factors)):.2f}"
+                    f"Ônus médio por município: R$ {np.round(onus_value / len(df_factors), 2)}"
                 )
                 st.write(
-                    f"Ônus por habitante: R$ {(onus_value / population_total):.2f}"
+                    f"Ônus por habitante: R$ {np.round(onus_value / population_total, 2)}"
                 )
 
     @staticmethod
