@@ -1,6 +1,7 @@
 from pathlib import Path
 import pandas as pd
 import geopandas as gpd
+import numpy as np
 
 ROOT = Path(__file__).parent
 AREA_PREST = ROOT / "data/df_Mun_UF_Area.csv"
@@ -68,12 +69,14 @@ class DataProcessor:
         df_area_state = self.dfAreaPrest[self.dfAreaPrest["UF"] == state]
         df_pop_year_state = self.get_population_data_for_year_state(year, state)
 
-        df_merged = df_area_state.merge(df_pop_year_state, how="left", on="codMun")
+        df_merged = df_area_state.merge(
+            df_pop_year_state, how="left", on=["codMun", "UF"]
+        )
         df_merged.drop_duplicates(inplace=True)
 
-        if "UF_x" in df_merged.columns and "UF_y" in df_merged.columns:
-            df_merged.drop("UF_x", axis=1, inplace=True)
-            df_merged.rename(columns={"UF_y": "UF"}, inplace=True)
+        # if "UF_x" in df_merged.columns and "UF_y" in df_merged.columns:
+        #     df_merged.drop("UF_x", axis=1, inplace=True)
+        #     df_merged.rename(columns={"UF_y": "UF"}, inplace=True)
 
         return df_merged
 
@@ -115,7 +118,7 @@ class DataProcessor:
         df_area_pop = self.get_area_population_data(year, state)
         df_exclusion = pd.DataFrame()
 
-        for area in exclusion_areas:
+        for area in exclusion_areas.split(","):
             df_area = df_area_pop[df_area_pop["AreaPrestacao"] == area]
             df_exclusion = pd.concat([df_exclusion, df_area])
 
@@ -129,30 +132,21 @@ class DataProcessor:
 
         df_exclusion = pd.DataFrame()
 
-        for municipality in exclusion_municipalities:
+        for municipality in exclusion_municipalities.split(","):
             df_mun = df_service_area[df_service_area["Municipio"] == municipality]
             df_exclusion = pd.concat([df_exclusion, df_mun])
 
         excluded_mun_codes = df_exclusion["codMun"].unique()
         return df_service_area.loc[~df_service_area["codMun"].isin(excluded_mun_codes)]
 
-    def generate_final_df(
-        self,
-        year_base,
-        entity,
-        term_num,
-        term_year,
-        state,
-        service_area,
-        exclusion_areas,
-        exclusion_municipalities,
-        freq_ini,
-        freq_fin,
-        freq,
-        bandwidth,
-        term_type,
-    ):
+    def generate_final_df(self, term):
         """Generate the final dataframe for a term"""
+        year_base = term["AnoBase"]
+        state = term["UF"]
+        service_area = term["areaPrestacao"]
+        exclusion_areas = term["areaExclusao"]
+        exclusion_municipalities = term["munExclusao"]
+
         # Get service area data
         df_service_area = self.get_service_area_data(year_base, state, service_area)
 
@@ -168,14 +162,17 @@ class DataProcessor:
         df_final["AreaExclusao"] = str(exclusion_areas)
         df_final["MunExclusao"] = str(exclusion_municipalities)
         df_final["AnoBase"] = year_base
-        df_final["Entidade"] = entity
-        df_final["NumTermo"] = term_num
-        df_final["AnoTermo"] = term_year
-        df_final["FreqIni"] = freq_ini
-        df_final["FreqFin"] = freq_fin
-        df_final["Freq"] = freq
-        df_final["Banda"] = bandwidth
-        df_final["TIPO"] = term_type
+        OTHER_COLUMNS = [
+            "Entidade",
+            "NumTermo",
+            "AnoTermo",
+            "freqInicial",
+            "freqFinal",
+            "Freq",
+            "Banda",
+            "Tipo",
+        ]
+        df_final.loc[:, OTHER_COLUMNS] = term.loc[OTHER_COLUMNS].values
 
         return df_final
 
