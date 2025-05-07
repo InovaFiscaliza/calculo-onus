@@ -112,7 +112,7 @@ class DataProcessor:
             if area_mun_codes < main_area_mun_codes:
                 eligible_areas.append(area)
 
-        return ",".join(eligible_areas)
+        return eligible_areas
 
     def apply_exclusion_areas(self, df_service_area, exclusion_areas, year, state):
         """Apply exclusion areas to a service area dataframe"""
@@ -122,7 +122,10 @@ class DataProcessor:
         df_area_pop = self.get_area_population_data(year, state)
         df_exclusion = pd.DataFrame()
 
-        for area in exclusion_areas.split(","):
+        if isinstance(exclusion_areas, str):
+            exclusion_areas = exclusion_areas.split(",")
+
+        for area in exclusion_areas:
             df_area = df_area_pop[df_area_pop["AreaPrestacao"] == area]
             df_exclusion = pd.concat([df_exclusion, df_area])
 
@@ -136,7 +139,10 @@ class DataProcessor:
 
         df_exclusion = pd.DataFrame()
 
-        for municipality in exclusion_municipalities.split(","):
+        if isinstance(exclusion_municipalities, str):
+            exclusion_municipalities = exclusion_municipalities.split(",")
+
+        for municipality in exclusion_municipalities:
             df_mun = df_service_area[df_service_area["Municipio"] == municipality]
             df_exclusion = pd.concat([df_exclusion, df_mun])
 
