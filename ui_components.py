@@ -11,10 +11,13 @@ class UIComponents:
     Class containing reusable UI components for the application
     """
 
+    def __init__(self, session_state):
+        self.st = session_state
+
     @staticmethod
     def setup_page():
         """Configure the page layout and title"""
-        st.set_page_config(layout="wide")
+        st.set_page_config(layout="wide", page_title="Cálculo do Ônus Contratual")
         st.title("Cálculo do Ônus Contratual :vibration_mode:")
 
     @staticmethod
@@ -22,8 +25,7 @@ class UIComponents:
         """Create the main application tabs"""
         return st.tabs(["Cadastro/Carregamento", "Tabelas", "Mapas", "Cálculo do Ônus"])
 
-    @staticmethod
-    def render_term_form(data_processor):
+    def render_term_form(self, data_source):
         """
         Render the term registration form
 
@@ -34,71 +36,71 @@ class UIComponents:
             dict: Form data if submitted, None otherwise
         """
         with st.container(border=True):
-            dfTermoCol = st.columns(13)
+            cols = st.columns(13)
 
             # Year selection
-            with dfTermoCol[0]:
-                listaAnoBase = data_processor.get_unique_years()
+            with cols[0]:
                 st.selectbox(
-                    "Ano Base Populacional", options=listaAnoBase, key="input_anoBase"
+                    "Ano Base Populacional",
+                    options=data_source.get_unique_years(),
+                    key="input_anoBase",
                 )
 
             # Operator selection
-            with dfTermoCol[1]:
-                listaOP = data_processor.get_operators_list()
-                st.selectbox("Operadora", options=listaOP, key="input_entidade")
+            with cols[1]:
+                st.selectbox(
+                    "Operadora",
+                    options=data_source.get_operators_list(),
+                    key="input_entidade",
+                )
 
             # Term number
-            with dfTermoCol[2]:
+            with cols[2]:
                 st.text_input(
                     "Numero do Termo", key="input_NumTermo", placeholder="Termo"
                 )
 
             # Term year
-            with dfTermoCol[3]:
+            with cols[3]:
                 listaAno = list(range(2005, dt.now().year))
                 st.selectbox("Ano do Termo", key="input_AnoTermo", options=listaAno)
 
             # State selection
-            with dfTermoCol[4]:
-                listaUF = data_processor.get_states_for_year(
-                    st.session_state.input_anoBase
-                )
+            with cols[4]:
+                listaUF = data_source.get_states_for_year(self.st.input_anoBase)
                 st.selectbox("Estado", options=listaUF, key="input_UF")
 
             # Service area selection
-            with dfTermoCol[5]:
-                listaAreas = data_processor.get_service_areas_for_state(
-                    st.session_state.input_UF
-                )
+            with cols[5]:
+                listaAreas = data_source.get_service_areas_for_state(self.st.input_UF)
                 st.selectbox(
                     "Area de Prestação", options=listaAreas, key="input_areaPrestacao"
                 )
 
             # Exclusion areas selection
-            with dfTermoCol[6]:
-                listaAreasExcl = data_processor.get_exclusion_areas(
-                    st.session_state.input_anoBase,
-                    st.session_state.input_UF,
-                    st.session_state.input_areaPrestacao,
+            with cols[6]:
+                listaAreasExcl = data_source.get_exclusion_areas(
+                    self.st.input_anoBase,
+                    self.st.input_UF,
+                    self.st.input_areaPrestacao,
                 )
                 st.multiselect(
                     "Areas de Exclusão", options=listaAreasExcl, key="input_areaExcl"
                 )
 
             # Exclusion municipalities selection
-            with dfTermoCol[7]:
-                df_service_area = data_processor.get_service_area_data(
-                    st.session_state.input_anoBase,
-                    st.session_state.input_UF,
-                    st.session_state.input_areaPrestacao,
+            with cols[7]:
+                df_service_area = data_source.get_service_area_data(
+                    self.st.input_anoBase,
+                    self.st.input_UF,
+                    self.st.input_areaPrestacao,
                 )
 
-                df_after_exclusions = data_processor.apply_exclusion_areas(
+                df_after_exclusions = data_source.apply_exclusion_areas(
                     df_service_area,
-                    st.session_state.input_areaExcl,
-                    st.session_state.input_anoBase,
-                    st.session_state.input_UF,
+                    self.st.input_areaExcl,
+                    self.st.input_anoBase,
+                    self.st.input_UF,
                 )
 
                 listaMun_excl = df_after_exclusions["Municipio"].unique()
@@ -109,59 +111,64 @@ class UIComponents:
                 )
 
             # Frequency inputs
-            with dfTermoCol[8]:
+            with cols[8]:
                 st.number_input("Frequência Inicial(MHz)", key="input_freqInicial")
 
-            with dfTermoCol[9]:
+            with cols[9]:
                 st.number_input("Frequência Final(MHz)", key="input_freqFinal")
 
-            with dfTermoCol[10]:
+            with cols[10]:
                 freq_central = (
-                    st.session_state.input_freqFinal
-                    - (
-                        st.session_state.input_freqFinal
-                        - st.session_state.input_freqInicial
-                    )
-                    / 2
+                    self.st.input_freqFinal
+                    - (self.st.input_freqFinal - self.st.input_freqInicial) / 2
                 )
                 st.number_input(
                     "Frequência Central", key="Freq", value=freq_central, disabled=True
                 )
 
-            with dfTermoCol[11]:
-                bandwidth = (
-                    st.session_state.input_freqFinal
-                    - st.session_state.input_freqInicial
-                )
+            with cols[11]:
+                bandwidth = self.st.input_freqFinal - self.st.input_freqInicial
                 st.number_input("Banda(MHz)", key="BW", value=bandwidth, disabled=True)
 
             # Term type
-            with dfTermoCol[12]:
+            with cols[12]:
                 st.selectbox("Tipo", options=["ONUS", "DEMAIS"], key="input_tipo")
 
             # Submit button
-            with dfTermoCol[0]:
+            with cols[0]:
                 if st.button("Aplicar", key="buttonTermo"):
+                    # Validate frequency values
+                    if freq_initial := float(self.st.input_freqInicial) <= 0:
+                        st.error("A frequência inicial deve ser maior que zero.")
+                        return None
+                    if freq_final := float(self.st.input_freqFinal) <= 0:
+                        st.error("A frequência final deve ser maior que zero.")
+                        return None
+                    if freq_final <= freq_initial:
+                        st.error(
+                            "A frequência final deve ser maior que a frequência inicial."
+                        )
+                        return None
+
                     return {
-                        "AnoBase": st.session_state.input_anoBase,
-                        "Entidade": st.session_state.input_entidade,
-                        "NumTermo": st.session_state.input_NumTermo,
-                        "AnoTermo": st.session_state.input_AnoTermo,
-                        "UF": st.session_state.input_UF,
-                        "areaPrestacao": st.session_state.input_areaPrestacao,
-                        "areaExclusao": ", ".join(st.session_state.input_areaExcl),
-                        "munExclusao": ", ".join(st.session_state.input_munExclusao),
-                        "freqInicial": st.session_state.input_freqInicial,
-                        "freqFinal": st.session_state.input_freqFinal,
+                        "AnoBase": self.st.input_anoBase,
+                        "Entidade": self.st.input_entidade,
+                        "NumTermo": self.st.input_NumTermo,
+                        "AnoTermo": self.st.input_AnoTermo,
+                        "UF": self.st.input_UF,
+                        "areaPrestacao": self.st.input_areaPrestacao,
+                        "areaExclusao": ", ".join(self.st.input_areaExcl),
+                        "munExclusao": ", ".join(self.st.input_munExclusao),
+                        "freqInicial": self.st.input_freqInicial,
+                        "freqFinal": self.st.input_freqFinal,
                         "Freq": freq_central,
                         "Banda": bandwidth,
-                        "Tipo": st.session_state.input_tipo,
+                        "Tipo": self.st.input_tipo,
                     }
 
             return None
 
-    @staticmethod
-    def render_terms_editor(df_terms):
+    def render_terms_editor(self, df_terms):
         """
         Render the terms data editor
 
@@ -182,7 +189,7 @@ class UIComponents:
             height=300,
         )
 
-        return st.session_state.dfTermoFinal.get("deleted_rows", [])
+        return self.st.dfTermoFinal.get("deleted_rows", [])
 
     @staticmethod
     def render_tables_tab(df_terms, df_municipalities):
@@ -494,18 +501,3 @@ class UIComponents:
             return list(deleted_indices)
 
         return None
-
-    @staticmethod
-    def render_error_message(message):
-        """Render an error message"""
-        st.error(message)
-
-    @staticmethod
-    def render_info_message(message):
-        """Render an info message"""
-        st.info(message)
-
-    @staticmethod
-    def render_success_message(message):
-        """Render a success message"""
-        st.success(message)
