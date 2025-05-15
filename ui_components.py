@@ -1,18 +1,14 @@
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
+
+# import folium
+# from streamlit_folium import st_folium
 from datetime import datetime as dt
-import numpy as np
-from pathlib import Path
 
 
 class UIComponents:
     """
     Class containing reusable UI components for the application
     """
-
-    def __init__(self, session_state):
-        self.st = session_state
 
     @staticmethod
     def setup_page():
@@ -67,12 +63,16 @@ class UIComponents:
 
             # State selection
             with cols[4]:
-                listaUF = data_source.get_states_for_year(self.st.input_anoBase)
+                listaUF = data_source.get_states_for_year(
+                    st.session_state.input_anoBase
+                )
                 st.selectbox("Estado", options=listaUF, key="input_UF")
 
             # Service area selection
             with cols[5]:
-                listaAreas = data_source.get_service_areas_for_state(self.st.input_UF)
+                listaAreas = data_source.get_service_areas_for_state(
+                    st.session_state.input_UF
+                )
                 st.selectbox(
                     "Area de Prestação", options=listaAreas, key="input_areaPrestacao"
                 )
@@ -80,9 +80,9 @@ class UIComponents:
             # Exclusion areas selection
             with cols[6]:
                 listaAreasExcl = data_source.get_exclusion_areas(
-                    self.st.input_anoBase,
-                    self.st.input_UF,
-                    self.st.input_areaPrestacao,
+                    st.session_state.input_anoBase,
+                    st.session_state.input_UF,
+                    st.session_state.input_areaPrestacao,
                 )
                 st.multiselect(
                     "Areas de Exclusão", options=listaAreasExcl, key="input_areaExcl"
@@ -91,16 +91,16 @@ class UIComponents:
             # Exclusion municipalities selection
             with cols[7]:
                 df_service_area = data_source.get_service_area_data(
-                    self.st.input_anoBase,
-                    self.st.input_UF,
-                    self.st.input_areaPrestacao,
+                    st.session_state.input_anoBase,
+                    st.session_state.input_UF,
+                    st.session_state.input_areaPrestacao,
                 )
 
                 df_after_exclusions = data_source.apply_exclusion_areas(
                     df_service_area,
-                    self.st.input_areaExcl,
-                    self.st.input_anoBase,
-                    self.st.input_UF,
+                    st.session_state.input_areaExcl,
+                    st.session_state.input_anoBase,
+                    st.session_state.input_UF,
                 )
 
                 listaMun_excl = df_after_exclusions["Municipio"].unique()
@@ -112,22 +112,27 @@ class UIComponents:
 
             # Frequency inputs
             with cols[8]:
-                st.number_input("Frequência Inicial(MHz)", key="input_freqInicial")
+                st.number_input(
+                    "Frequência Inicial(MHz)", key="freq_initial", min_value=0
+                )
 
             with cols[9]:
-                st.number_input("Frequência Final(MHz)", key="input_freqFinal")
+                st.number_input("Frequência Final(MHz)", key="freq_final", min_value=0)
 
             with cols[10]:
                 freq_central = (
-                    self.st.input_freqFinal
-                    - (self.st.input_freqFinal - self.st.input_freqInicial) / 2
+                    st.session_state.freq_final
+                    - (st.session_state.freq_final - st.session_state.freq_initial) / 2
                 )
                 st.number_input(
-                    "Frequência Central", key="Freq", value=freq_central, disabled=True
+                    "Frequência Central",
+                    key="FrequenciaCentral",
+                    value=freq_central,
+                    disabled=True,
                 )
 
             with cols[11]:
-                bandwidth = self.st.input_freqFinal - self.st.input_freqInicial
+                bandwidth = st.session_state.freq_final - st.session_state.freq_initial
                 st.number_input("Banda(MHz)", key="BW", value=bandwidth, disabled=True)
 
             # Term type
@@ -138,32 +143,34 @@ class UIComponents:
             with cols[0]:
                 if st.button("Aplicar", key="buttonTermo"):
                     # Validate frequency values
-                    if freq_initial := float(self.st.input_freqInicial) <= 0:
+                    if st.session_state.freq_initial <= 0:
                         st.error("A frequência inicial deve ser maior que zero.")
                         return None
-                    if freq_final := float(self.st.input_freqFinal) <= 0:
+                    if st.session_state.freq_final <= 0:
                         st.error("A frequência final deve ser maior que zero.")
                         return None
-                    if freq_final <= freq_initial:
+                    if st.session_state.freq_final <= st.session_state.freq_initial:
                         st.error(
                             "A frequência final deve ser maior que a frequência inicial."
                         )
                         return None
 
                     return {
-                        "AnoBase": self.st.input_anoBase,
-                        "Entidade": self.st.input_entidade,
-                        "NumTermo": self.st.input_NumTermo,
-                        "AnoTermo": self.st.input_AnoTermo,
-                        "UF": self.st.input_UF,
-                        "areaPrestacao": self.st.input_areaPrestacao,
-                        "areaExclusao": ", ".join(self.st.input_areaExcl),
-                        "munExclusao": ", ".join(self.st.input_munExclusao),
-                        "freqInicial": self.st.input_freqInicial,
-                        "freqFinal": self.st.input_freqFinal,
-                        "Freq": freq_central,
+                        "AnoBase": st.session_state.input_anoBase,
+                        "Entidade": st.session_state.input_entidade,
+                        "NumTermo": st.session_state.input_NumTermo,
+                        "AnoTermo": st.session_state.input_AnoTermo,
+                        "UF": st.session_state.input_UF,
+                        "AreaPrestacao": st.session_state.input_areaPrestacao,
+                        "AreaExclusao": ", ".join(st.session_state.input_areaExcl),
+                        "MunicipioExclusao": ", ".join(
+                            st.session_state.input_munExclusao
+                        ),
+                        "FrequenciaInicial": st.session_state.freq_initial,
+                        "FrequenciaFinal": st.session_state.freq_final,
+                        "FrequenciaCentral": freq_central,
                         "Banda": bandwidth,
-                        "Tipo": self.st.input_tipo,
+                        "Tipo": st.session_state.input_tipo,
                     }
 
             return None
@@ -189,7 +196,7 @@ class UIComponents:
             height=300,
         )
 
-        return self.st.dfTermoFinal.get("deleted_rows", [])
+        return st.session_state.dfTermoFinal.get("deleted_rows", [])
 
     @staticmethod
     def render_tables_tab(df_terms, df_municipalities):
@@ -244,16 +251,16 @@ class UIComponents:
 
                 # Format frequency range for display
                 df_area_map_freq = df_area_map.copy()
-                df_area_map_freq["freqInicial"] = df_area_map["freqInicial"].astype(
-                    "string"
-                )
-                df_area_map_freq["freqFinal"] = df_area_map["freqFinal"].astype(
-                    "string"
-                )
+                df_area_map_freq["FrequenciaInicial"] = df_area_map[
+                    "FrequenciaInicial"
+                ].astype("string")
+                df_area_map_freq["FrequenciaFinal"] = df_area_map[
+                    "FrequenciaFinal"
+                ].astype("string")
                 df_area_map_freq["Faixa"] = (
-                    df_area_map_freq["freqInicial"]
+                    df_area_map_freq["FrequenciaInicial"]
                     + " - "
-                    + df_area_map_freq["freqFinal"]
+                    + df_area_map_freq["FrequenciaFinal"]
                 )
 
             with col35:
@@ -276,99 +283,99 @@ class UIComponents:
             )
             return None, None, None, None, None
 
-    @staticmethod
-    def render_map(state, mun_codes):
-        """
-        Render the map for a specific state and municipalities
+    # @staticmethod
+    # def render_map(state, mun_codes):
+    #     """
+    #     Render the map for a specific state and municipalities
 
-        Args:
-            state: State code (UF)
-            mun_codes: List of municipality codes to highlight
+    #     Args:
+    #         state: State code (UF)
+    #         mun_codes: List of municipality codes to highlight
 
-        Returns:
-            None
-        """
-        import geopandas as gpd
+    #     Returns:
+    #         None
+    #     """
+    #     import geopandas as gpd
 
-        try:
-            # Load map data
-            map_data = gpd.read_file(Path(__file__).parent / f"SHP_UFs/{state}.shp")
+    #     try:
+    #         # Load map data
+    #         map_data = gpd.read_file(Path(__file__).parent / f"SHP_UFs/{state}.shp")
 
-            if map_data is not None:
-                # Create GeoDataFrame
-                geo_df = gpd.GeoDataFrame(
-                    map_data, geometry="geometry", crs="EPSG:3857"
-                )
+    #         if map_data is not None:
+    #             # Create GeoDataFrame
+    #             geo_df = gpd.GeoDataFrame(
+    #                 map_data, geometry="geometry", crs="EPSG:3857"
+    #             )
 
-                # Filter for selected municipalities
-                geo_df_area = geo_df[geo_df["geocodigo"].isin(mun_codes)]
+    #             # Filter for selected municipalities
+    #             geo_df_area = geo_df[geo_df["geocodigo"].isin(mun_codes)]
 
-                # Get map bounds
-                lon_min, lat_min, lon_max, lat_max = map_data.total_bounds
+    #             # Get map bounds
+    #             lon_min, lat_min, lon_max, lat_max = map_data.total_bounds
 
-                # Create Folium map
-                map_folium = folium.Map(
-                    location=[-15.8, -47.8],
-                    no_touch=True,
-                    tiles="openstreetmap",
-                    control_scale=True,
-                    crs="EPSG3857",
-                    zoom_start=4,
-                    key="mapaBase",
-                    prefer_canvas=False,
-                    max_bounds=True,
-                    tooltip="tooltip",
-                )
-                map_folium.fit_bounds([[lat_min, lon_min], [lat_max, lon_max]])
+    #             # Create Folium map
+    #             map_folium = folium.Map(
+    #                 location=[-15.8, -47.8],
+    #                 no_touch=True,
+    #                 tiles="openstreetmap",
+    #                 control_scale=True,
+    #                 crs="EPSG3857",
+    #                 zoom_start=4,
+    #                 key="mapaBase",
+    #                 prefer_canvas=False,
+    #                 max_bounds=True,
+    #                 tooltip="tooltip",
+    #             )
+    #             map_folium.fit_bounds([[lat_min, lon_min], [lat_max, lon_max]])
 
-                # Add feature groups
-                group_map = folium.FeatureGroup(name="grupoMapa").add_to(map_folium)
+    #             # Add feature groups
+    #             group_map = folium.FeatureGroup(name="grupoMapa").add_to(map_folium)
 
-                # Add state boundaries
-                pol_sim_geo = gpd.GeoDataFrame(geo_df["geometry"]).simplify(
-                    tolerance=0.01
-                )
-                pol_geo_json = pol_sim_geo.to_json()
-                pol_geo = folium.GeoJson(
-                    data=pol_geo_json,
-                    style_function=lambda x: {
-                        "fillColor": "#FF0000",
-                        "fillOpacity": 0.2,
-                        "weight": 0.2,
-                        "color": "#B00000",
-                    },
-                )
+    #             # Add state boundaries
+    #             pol_sim_geo = gpd.GeoDataFrame(geo_df["geometry"]).simplify(
+    #                 tolerance=0.01
+    #             )
+    #             pol_geo_json = pol_sim_geo.to_json()
+    #             pol_geo = folium.GeoJson(
+    #                 data=pol_geo_json,
+    #                 style_function=lambda x: {
+    #                     "fillColor": "#FF0000",
+    #                     "fillOpacity": 0.2,
+    #                     "weight": 0.2,
+    #                     "color": "#B00000",
+    #                 },
+    #             )
 
-                # Add service area
-                pol_sim_geo_term = gpd.GeoDataFrame(geo_df_area["geometry"]).simplify(
-                    tolerance=0.01
-                )
-                pol_geo_json_term = pol_sim_geo_term.to_json()
-                pol_geo_term = folium.GeoJson(
-                    data=pol_geo_json_term,
-                    style_function=lambda x: {
-                        "fillColor": "#4AC423",
-                        "color": "#1C5727",
-                        "fillOpacity": 0.5,
-                        "weight": 0.5,
-                    },
-                )
+    #             # Add service area
+    #             pol_sim_geo_term = gpd.GeoDataFrame(geo_df_area["geometry"]).simplify(
+    #                 tolerance=0.01
+    #             )
+    #             pol_geo_json_term = pol_sim_geo_term.to_json()
+    #             pol_geo_term = folium.GeoJson(
+    #                 data=pol_geo_json_term,
+    #                 style_function=lambda x: {
+    #                     "fillColor": "#4AC423",
+    #                     "color": "#1C5727",
+    #                     "fillOpacity": 0.5,
+    #                     "weight": 0.5,
+    #                 },
+    #             )
 
-                # Add layers to map
-                group_map.add_child(pol_geo_term)
-                group_map.add_child(pol_geo)
+    #             # Add layers to map
+    #             group_map.add_child(pol_geo_term)
+    #             group_map.add_child(pol_geo)
 
-                # Display the map
-                st_folium(
-                    map_folium,
-                    feature_group_to_add=group_map,
-                    returned_objects=[],
-                    zoom=4,
-                    width=1200,
-                    height=600,
-                )
-        except Exception as e:
-            st.error(f"Erro ao carregar o mapa: {e}")
+    #             # Display the map
+    #             st_folium(
+    #                 map_folium,
+    #                 feature_group_to_add=group_map,
+    #                 returned_objects=[],
+    #                 zoom=4,
+    #                 width=1200,
+    #                 height=600,
+    #             )
+    #     except Exception as e:
+    #         st.error(f"Erro ao carregar o mapa: {e}")
 
     @staticmethod
     def render_onus_controls(df_data):
@@ -381,7 +388,7 @@ class UIComponents:
         Returns:
             tuple: Selected year, entity, state, term, term year, and ROL
         """
-        colA, colB, colC, colD, colE, colF = st.columns(6)
+        colA, colB, colC = st.columns(3)
 
         with colA:
             # Select population base year
@@ -403,6 +410,8 @@ class UIComponents:
             states = df_entity["UF"].unique()
             state = st.selectbox("Estado", options=states, key="anoBaseUF")
 
+        colD, colE, colF = st.columns(3)
+
         with colD:
             # Select term
             df_state = df_entity[df_entity["UF"] == state]
@@ -423,14 +432,10 @@ class UIComponents:
                 "Receita Operacional Líquida (ROL) da UF", value=1000000.00
             )
 
-        with colB:
-            # Display term identification
-            st.subheader(f":abacus: ÔNUS - Termo {term}/{str(term_year).split('.')[0]}")
-
         return year, entity, state, term, term_year, rol
 
     @staticmethod
-    def render_onus_result(onus_value, df_factors, population_total):
+    def render_onus_result(df_factors):
         """
         Render the ônus calculation result
 
@@ -439,35 +444,21 @@ class UIComponents:
             df_factors: DataFrame with municipality factors
             population_total: Total population
         """
-        st.subheader(f"R$ {np.round(onus_value.item(), 2)}")
 
         # Display factors table with formatting
         if not df_factors.empty:
             st.subheader("Fatores por Município")
 
             # Format the dataframe for display
-            df_display = df_factors.copy()
-            df_display["fatorFreq"] = df_display["fatorFreq"].apply(
+            df_factors["fatorFreq"] = df_factors["fatorFreq"].apply(
                 lambda x: f"{x:.4f}"
             )
-            df_display["fatorPop"] = df_display["fatorPop"].apply(lambda x: f"{x:.6f}")
-            df_display["onusMunicipio"] = df_display["onusMunicipio"].apply(
+            df_factors["fatorPop"] = df_factors["fatorPop"].apply(lambda x: f"{x:.6f}")
+            df_factors["onusMunicipio"] = df_factors["onusMunicipio"].apply(
                 lambda x: f"R$ {x:.2f}"
             )
 
-            st.dataframe(df_display)
-
-            # Show summary statistics
-            with st.expander("Estatísticas do cálculo"):
-                st.write(f"Total de municípios: {len(df_factors)}")
-                st.write(f"População total: {population_total:,}".replace(",", "."))
-                st.write(f"Ônus total: R$ {onus_value}")
-                st.write(
-                    f"Ônus médio por município: R$ {np.round(onus_value / len(df_factors), 2)}"
-                )
-                st.write(
-                    f"Ônus por habitante: R$ {np.round(onus_value / population_total, 2)}"
-                )
+            st.dataframe(df_factors)
 
     @staticmethod
     def render_terms_filter(df_terms, year, state):
