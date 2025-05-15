@@ -176,17 +176,20 @@ def input_csv_data():
     """Read CSV data from file"""
 
     # Read the CSV file
-    uploaded_df = pd.read_csv(uploaded_file, dtype="string", sep=";").fillna("")
+    uploaded_df = pd.read_csv(uploaded_file, dtype="string", sep=",").fillna("")
 
-    if missing_columns := [
-        col for col in EXPECTED_COLUMNS if col not in uploaded_df.columns
-    ]:
+    if any(col for col in EXPECTED_COLUMNS if col not in uploaded_df.columns):
         st.error("O arquivo CSV não contém o formato esperado!", icon="🚨")
-        st.info("Certifique que a formatação está correta. Exemplo:", icon="ℹ️")
+        st.info(
+            "Certifique que a formatação está correta. `AreaExclusao` e `MunicipioExclusao` devem ser separados por `'; '` (ponto-e-vírgula + espaço) caso haver mais de 1. Exemplo:",
+            icon="ℹ️",
+        )
         code = """
-                AnoBase;Entidade;UF;AreaPrestacao;AreaExclusao;MunicipioExclusao;FrequenciaInicial;FrequenciaFinal;FrequenciaCentral;Banda;Tipo;AnoTermo;NumTermo
-                2021;CLARO;SP;SP2;;;25300;25700;25500;400;ONUS;2021;61
-                2021;CLARO;SP;Setor 31;CN 19;"Agudos, Altair";2300;2400;2350;100;ONUS;2021;61
+                AnoBase,Entidade,NumTermo,AnoTermo,UF,AreaPrestacao,AreaExclusao,MunicipioExclusao,FrequenciaInicial,FrequenciaFinal,FrequenciaCentral,Banda,Tipo
+                2021,CLARO,61,2021,SP,SP2,,,25300,25700,25500,400,ONUS
+                2021,TIM,61,2021,SP,Setor 31,CN 14; CN 19,,2300,2400,2350,100,ONUS
+                2021,TIM,61,2021,SP,Setor 31,CN 14; CN 19,Adolfo; Alfredo Marcondes; Alto Alegre,2300,2400,2350,100,ONUS
+
                 """
         st.code(code, language=None)
     else:
