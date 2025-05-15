@@ -47,7 +47,9 @@ class OnusCalculator:
 
         # Count frequencies and prepare data
         df_count_freq = self._count_frequencies(df_year_base)
-        df_data_count_freq = df_year_base.merge(df_count_freq, how="inner", on="Freq")
+        df_data_count_freq = df_year_base.merge(
+            df_count_freq, how="inner", on="FrequenciaCentral"
+        )
 
         # Get term data
         df_term = self._get_term_data(
@@ -68,7 +70,7 @@ class OnusCalculator:
 
     def _count_frequencies(self, df):
         """Count frequency occurrences in the dataframe"""
-        return pd.DataFrame(df.Freq.value_counts())
+        return pd.DataFrame(df.FrequenciaCentral.value_counts())
 
     def _get_term_data(self, df, entity, state, term_num, term_year):
         """Filter dataframe to get data for the specific term"""
@@ -79,9 +81,9 @@ class OnusCalculator:
         df_term = df_term_num[df_term_num["AnoTermo"] == term_year]
 
         # Calculate bandwidth/frequency ratio
-        df_term["BW_Freq"] = df_term["Banda"].astype("float") / df_term["Freq"].astype(
-            "float"
-        )
+        df_term.loc[:, "BW_Freq"] = df_term["Banda"].astype("float") / df_term[
+            "FrequenciaCentral"
+        ].astype("float")
 
         return df_term
 
@@ -93,7 +95,9 @@ class OnusCalculator:
         df_other_terms = df_state[df_state["NumTermo"] != term_num]
 
         # Calculate bandwidth/frequency ratio
-        df_other_terms["BW_Freq"] = df_other_terms["Banda"] / df_other_terms["Freq"]
+        df_other_terms["BW_Freq"] = (
+            df_other_terms["Banda"] / df_other_terms["FrequenciaCentral"]
+        )
 
         return df_other_terms
 
