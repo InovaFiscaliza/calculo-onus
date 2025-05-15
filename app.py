@@ -23,7 +23,7 @@ EXPECTED_COLUMNS = [
 ]
 
 COLUMN_CONFIG = {
-    "AnoBase": st.column_config.TextColumn(
+    "AnoBase": st.column_config.NumberColumn(
         "Ano - Base",
         width=None,
         help="📜Ano - Base",
@@ -57,6 +57,30 @@ COLUMN_CONFIG = {
         "Municípios a Excluir",
         width=None,
         help="📜Municípios a Excluir",
+        disabled=True,
+    ),
+    "codMun": st.column_config.NumberColumn(
+        "Código Município",
+        width=None,
+        help="📜Código Município",
+        disabled=True,
+    ),
+    "fatorFreq": st.column_config.NumberColumn(
+        "Fator de Frequência",
+        width=None,
+        help="📜Fator de Frequência",
+        disabled=True,
+    ),
+    "fatorPop": st.column_config.NumberColumn(
+        "Fator de População",
+        width=None,
+        help="📜Fator de População",
+        disabled=True,
+    ),
+    "onusMunicipio": st.column_config.TextColumn(
+        "Ônus Município",
+        width=None,
+        help="📜Ônus Município",
         disabled=True,
     ),
     "FrequenciaInicial": st.column_config.NumberColumn(
@@ -129,22 +153,29 @@ def concat2df(row):
     else:
         st.session_state.df = pd.concat(
             [st.session_state.df, pd.DataFrame(row)], ignore_index=True
-        )
+        ).drop_duplicates()
 
 
 @st.fragment
-@st.dialog("⚠️Sustituir os dados existentes?")
+@st.dialog("⚠️Já existem dados inseridos.⚠️")
 def confirm_action(uploaded_df):
-    if st.button("Sim, substituir dados"):
-        update_df(uploaded_df)
-        st.rerun()
+    cols = st.columns(2)
+    with cols[0]:
+        if st.button("Concatenar dados do arquivo"):
+            concat2df(uploaded_df)
+            st.rerun()
+
+    with cols[1]:
+        if st.button("Substituir dados existentes pelos dados do arquivo"):
+            update_df(uploaded_df)
+            st.rerun()
 
 
 def input_csv_data():
     """Read CSV data from file"""
 
     # Read the CSV file
-    uploaded_df = pd.read_csv(uploaded_file, dtype="string")
+    uploaded_df = pd.read_csv(uploaded_file, dtype="string").fillna("")
 
     if missing_columns := [
         col for col in EXPECTED_COLUMNS if col not in uploaded_df.columns
@@ -154,7 +185,7 @@ def input_csv_data():
         )
     else:
         # Keep only the expected columns
-        uploaded_df = uploaded_df[EXPECTED_COLUMNS]
+        uploaded_df = uploaded_df.loc[:, EXPECTED_COLUMNS]
 
         if not st.session_state.df.empty:
             confirm_action(uploaded_df)
@@ -261,10 +292,6 @@ with aba1:
             )
             update_df(edited_df)
 
-            #     update_df(edited_df)
-
-        # else:
-        #     st.session_state.df = pd.DataFrame(columns=EXPECTED_COLUMNS)
     # Generate final dataframe for all terms
     if not st.session_state.df.empty:
         df_termos = data_processor.gerar_tabela_final(st.session_state.df)
@@ -306,15 +333,15 @@ with aba2:
                     rowb = st.columns(3)
                     rowb[0].metric(
                         label=f"Ônus Termo: {term}/{term_year}",
-                        value=f"R$ {np.round(onus.item(), 2)}",
+                        value=f"R$ {np.round(onus, 2)}",
                     )
                     rowb[1].metric(
                         "Ônus médio por município",
-                        value=f"R$ {np.round(onus.item() / len(df_factors), 2)}",
+                        value=f"R$ {np.round(onus / len(df_factors), 2)}",
                     )
                     rowb[2].metric(
                         "Ônus por habitante",
-                        value=f"R$ {np.round(onus.item() / population_total, 5)}",
+                        value=f"R$ {np.round(onus / population_total, 5)}",
                     )
 
             else:
@@ -331,12 +358,12 @@ with aba2:
                 lambda x: f"R$ {x:.2f}"
             )
 
-            st.dataframe(df_factors)
+            st.dataframe(df_factors, column_config=COLUMN_CONFIG, hide_index=True)
 
         # Display filtered terms with ability to delete rows
         with st.expander("Termos para a UF selecionada", expanded=False):
             df_terms = st.session_state.df[
                 (st.session_state.df["UF"] == state)
-                & (st.session_state.df["AnoBase"] == year)
+                & (st.session_state.df["AnoBase"] == str(year))
             ]
             st.dataframe(df_terms, column_config=COLUMN_CONFIG)
