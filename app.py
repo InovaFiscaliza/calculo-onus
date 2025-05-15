@@ -240,7 +240,7 @@ with aba1:
             disabled=not options_exclusao,
         )
         municipios_restantes = data_processor.exclude_areas_from_df(
-            area_prestacao, ano, uf, ", ".join(areas_exclusao)
+            area_prestacao, ano, uf, "; ".join(areas_exclusao)
         )["Municipio"].unique()
 
         mun_exclusao = first_row[4].multiselect(
@@ -272,8 +272,8 @@ with aba1:
                         "Entidade": [operadora],
                         "UF": [uf],
                         "AreaPrestacao": [area_prestacao],
-                        "AreaExclusao": [", ".join(areas_exclusao)],
-                        "MunicipioExclusao": [", ".join(mun_exclusao)],
+                        "AreaExclusao": ["; ".join(areas_exclusao)],
+                        "MunicipioExclusao": ["; ".join(mun_exclusao)],
                         "FrequenciaInicial": [freq_inicial],
                         "FrequenciaFinal": [freq_final],
                         "FrequenciaCentral": [freq_central],

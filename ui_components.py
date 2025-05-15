@@ -162,8 +162,8 @@ class UIComponents:
                         "AnoTermo": st.session_state.input_AnoTermo,
                         "UF": st.session_state.input_UF,
                         "AreaPrestacao": st.session_state.input_areaPrestacao,
-                        "AreaExclusao": ", ".join(st.session_state.input_areaExcl),
-                        "MunicipioExclusao": ", ".join(
+                        "AreaExclusao": "; ".join(st.session_state.input_areaExcl),
+                        "MunicipioExclusao": "; ".join(
                             st.session_state.input_munExclusao
                         ),
                         "FrequenciaInicial": st.session_state.freq_initial,

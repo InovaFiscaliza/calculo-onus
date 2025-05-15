@@ -118,7 +118,7 @@ class DataProcessor:
 
         df_area_pop = self.get_area_population_data(year, state)
 
-        areas_a_excluir = areas_a_excluir.split(", ")
+        areas_a_excluir = areas_a_excluir.split("; ")
 
         cidades_a_excluir = df_area_pop.loc[
             df_area_pop["AreaPrestacao"].isin(areas_a_excluir), "codMun"
@@ -131,7 +131,7 @@ class DataProcessor:
         if not cidades_a_excluir:
             return df_service_area
 
-        cidades_a_excluir = cidades_a_excluir.split(", ")
+        cidades_a_excluir = cidades_a_excluir.split("; ")
 
         cidades_a_excluir = df_service_area.loc[
             df_service_area["Municipio"].isin(cidades_a_excluir), "codMun"
