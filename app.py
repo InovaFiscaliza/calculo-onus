@@ -2,6 +2,7 @@ from datetime import datetime as dt
 import pandas as pd
 import numpy as np
 import streamlit as st
+from millify import millify, prettify
 from data_processor import DataProcessor, OPERADORAS
 from calculations import OnusCalculator
 from ui_components import UIComponents
@@ -329,19 +330,19 @@ with aba2:
                     st.subheader("Estatísticas do cálculo")
                     rowa = st.columns(3)
                     rowa[0].metric("Total de municípios", value=len(df_factors))
-                    rowa[1].metric("População total", value=population_total)
+                    rowa[1].metric("População total", value=prettify(population_total))
                     rowb = st.columns(3)
                     rowb[0].metric(
                         label=f"Ônus Termo: {term}/{term_year}",
-                        value=f"R$ {np.round(onus, 2)}",
+                        value=f"R$ {prettify(np.round(onus, 2).item())}",
                     )
                     rowb[1].metric(
                         "Ônus médio por município",
-                        value=f"R$ {np.round(onus / len(df_factors), 2)}",
+                        value=f"R$ {np.round(onus / len(df_factors), 2).item()}",
                     )
                     rowb[2].metric(
                         "Ônus por habitante",
-                        value=f"R$ {np.round(onus / population_total, 5)}",
+                        value=f"R$ {prettify(np.round(onus / population_total, 5).item())}",
                     )
 
             else:
