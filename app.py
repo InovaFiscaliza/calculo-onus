@@ -355,27 +355,27 @@ with aba2:
 
             else:
                 st.error(error_message)
-    if is_valid:
-        # Render result
-        with st.expander("Fatores por Município", expanded=True):
-            # Format the dataframe for display
-            df_factors["fatorFreq"] = df_factors["fatorFreq"].apply(
-                lambda x: f"{x:.4f}"
-            )
-            df_factors["fatorPop"] = df_factors["fatorPop"].apply(lambda x: f"{x:.6f}")
-            df_factors["onusMunicipio"] = df_factors["onusMunicipio"].apply(
-                lambda x: f"R$ {x:.2f}"
-            )
+        if is_valid:
+            # Render result
+            with st.expander("Fatores por Município", expanded=True):
+                # Format the dataframe for display
+                df_factors["fatorFreq"] = df_factors["fatorFreq"].apply(
+                    lambda x: f"{x:.4f}"
+                )
+                df_factors["fatorPop"] = df_factors["fatorPop"].apply(lambda x: f"{x:.6f}")
+                df_factors["onusMunicipio"] = df_factors["onusMunicipio"].apply(
+                    lambda x: f"R$ {x:.2f}"
+                )
 
-        st.dataframe(df_factors, column_config=COLUMN_CONFIG, hide_index=True)
+            st.dataframe(df_factors, column_config=COLUMN_CONFIG, hide_index=True)
 
-        # Display filtered terms with ability to delete rows
-        with st.expander("Termos para a UF selecionada", expanded=False):
-            df_terms = st.session_state.df[
-                (st.session_state.df["UF"] == state)
-                & (st.session_state.df["AnoBase"] == str(year))
-            ]
-            st.dataframe(df_terms, column_config=COLUMN_CONFIG, hide_index=True)
+            # Display filtered terms with ability to delete rows
+            with st.expander("Termos para a UF selecionada", expanded=False):
+                df_terms = st.session_state.df[
+                    (st.session_state.df["UF"] == state)
+                    & (st.session_state.df["AnoBase"] == str(year))
+                ]
+                st.dataframe(df_terms, column_config=COLUMN_CONFIG, hide_index=True)
 
 def get_version():
     pyproject = toml.load("pyproject.toml")
