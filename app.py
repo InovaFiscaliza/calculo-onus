@@ -34,7 +34,7 @@ COLUMN_CONFIG = {
         "Entidade",
         width=None,
         help="📜Entidade",
-        disabled=False,
+        disabled=True,
     ),
     "UF": st.column_config.TextColumn(
         "Estado",
@@ -118,13 +118,13 @@ COLUMN_CONFIG = {
         "Ano do Termo",
         width=None,
         help="📜Ano do Termo",
-        disabled=False,
+        disabled=True,
     ),
     "NumTermo": st.column_config.TextColumn(
         "Número do Termo",
         width=None,
         help="📜Número do Termo",
-        disabled=False,
+        disabled=True,
     ),
 }
 
@@ -139,22 +139,21 @@ ui.setup_page()
 # Create tabs
 aba1, aba2 = st.tabs(["Cadastro/Carregamento", "Cálculo do Ônus"])
 
+if "df" not in st.session_state:
+    st.session_state.df = pd.DataFrame(columns=EXPECTED_COLUMNS)
 
-def update_df(df=None):
+
+@st.fragment
+def update_df(df):
     """Display data in the data editor"""
-    if df is None:
-        df = pd.DataFrame(columns=EXPECTED_COLUMNS)
-    st.session_state.df = df.reset_index(drop=True)
-
-
-def concat2df(row):
-    """Display data in the data editor"""
-    if st.session_state.df.empty:
-        st.session_state.df = pd.DataFrame(row)
+    before_df = st.session_state.df.copy()
+    st.session_state.df = pd.concat(
+            [st.session_state.df, df], ignore_index=True
+        ).drop_duplicates().reset_index(drop=True)
+    if st.session_state.df.equals(before_df):
+        st.warning("Termo já adicionado!", icon="⚠️")
     else:
-        st.session_state.df = pd.concat(
-            [st.session_state.df, pd.DataFrame(row)], ignore_index=True
-        ).drop_duplicates()
+        st.success("Termo adicionado com sucesso!", icon="✅")
 
 
 @st.fragment
@@ -163,11 +162,12 @@ def confirm_action(uploaded_df):
     cols = st.columns(2)
     with cols[0]:
         if st.button("Concatenar dados do arquivo"):
-            concat2df(uploaded_df)
+            update_df(uploaded_df)
             st.rerun()
 
     with cols[1]:
         if st.button("Substituir dados existentes pelos dados do arquivo"):
+            st.session_state.df = pd.DataFrame(columns=EXPECTED_COLUMNS)
             update_df(uploaded_df)
             st.rerun()
 
@@ -192,8 +192,10 @@ def input_csv_data():
             confirm_action(uploaded_df)
         else:
             update_df(uploaded_df)
-            st.success("Dados carregados com sucesso!", icon="✅")
 
+def edit_df():
+    for idx in st.session_state["edited_df"]["deleted_rows"]:
+        st.session_state.df.drop(idx, inplace=True)
 
 uploaded_file = st.sidebar.file_uploader(
     "Carregar dados de um arquivo CSV",
@@ -261,7 +263,7 @@ with aba1:
             if freq_final - freq_inicial <= 0:
                 st.error("A frequência final deve ser maior que a inicial!")
             else:
-                concat2df(
+                df = pd.DataFrame(
                     {
                         "AnoBase": [ano],
                         "Entidade": [operadora],
@@ -277,21 +279,24 @@ with aba1:
                         "AnoTermo": [ano_termo],
                         "NumTermo": [n_termo],
                     }
-                )
-                st.rerun()
-    if "df" not in st.session_state:
-        update_df()
+                    )
+                if (df_termos := data_processor.gerar_tabela_final(df)).empty:
+                    st.error(f"Lista de Municípios vazia para os parâmetros inseridos!", icon=":material/error:")
+                else:
+                    update_df(df)
 
     if not st.session_state.df.empty:
         with st.expander("Tabela de Termos Cadastrados (Editável)", expanded=True):
-            edited_df = st.data_editor(
+            st.data_editor(
                 st.session_state.df,
                 column_config=COLUMN_CONFIG,
                 use_container_width=True,
                 hide_index=True,
                 num_rows="dynamic",
+                key="edited_df",
+                on_change=edit_df
             )
-            update_df(edited_df)
+            
 
     # Generate final dataframe for all terms
     if not st.session_state.df.empty:
@@ -325,29 +330,31 @@ with aba2:
                 onus, df_factors, population_total = onus_calculator.calculate_onus(
                     year, entity, state, term, term_year, rol, df_termos
                 )
+                is_valid = is_valid and not df_factors.empty
 
                 with col_b:
                     st.subheader("Estatísticas do cálculo")
                     rowa = st.columns(3)
                     rowa[0].metric("Total de municípios", value=len(df_factors))
-                    rowa[1].metric("População total", value=prettify(population_total))
-                    rowb = st.columns(3)
-                    rowb[0].metric(
-                        label=f"Ônus Termo: {term}/{term_year}",
-                        value=f"R$ {prettify(np.round(onus, 2).item())}",
-                    )
-                    rowb[1].metric(
-                        "Ônus médio por município",
-                        value=f"R$ {np.round(onus / len(df_factors), 2).item()}",
-                    )
-                    rowb[2].metric(
-                        "Ônus por habitante",
-                        value=f"R$ {prettify(np.round(onus / population_total, 5).item())}",
-                    )
+                    if is_valid:
+                        rowa[1].metric("População total", value=prettify(population_total))
+                        rowb = st.columns(3)
+                        rowb[0].metric(
+                            label=f"Ônus Termo: {term}/{term_year}",
+                            value=f"R$ {prettify(np.round(onus, 2).item())}",
+                        )
+                        rowb[1].metric(
+                            "Ônus médio por município",
+                            value=f"R$ {np.round(onus / len(df_factors), 2).item()}",
+                        )
+                        rowb[2].metric(
+                            "Ônus por habitante",
+                            value=f"R$ {prettify(np.round(onus / population_total, 5).item())}",
+                        )
 
             else:
                 st.error(error_message)
-
+    if is_valid:
         # Render result
         with st.expander("Fatores por Município", expanded=True):
             # Format the dataframe for display
@@ -359,7 +366,7 @@ with aba2:
                 lambda x: f"R$ {x:.2f}"
             )
 
-            st.dataframe(df_factors, column_config=COLUMN_CONFIG, hide_index=True)
+        st.dataframe(df_factors, column_config=COLUMN_CONFIG, hide_index=True)
 
         # Display filtered terms with ability to delete rows
         with st.expander("Termos para a UF selecionada", expanded=False):
@@ -367,4 +374,4 @@ with aba2:
                 (st.session_state.df["UF"] == state)
                 & (st.session_state.df["AnoBase"] == str(year))
             ]
-            st.dataframe(df_terms, column_config=COLUMN_CONFIG)
+            st.dataframe(df_terms, column_config=COLUMN_CONFIG, hide_index=True)

@@ -157,17 +157,17 @@ class DataProcessor:
                 tabela_com_areas_excluidas, municipios_exclusao
             )
 
-            tabela_final.loc[:, "AreaExclusao"] = areas_exclusao
-            tabela_final.loc[:, "MunicipioExclusao"] = municipios_exclusao
-            tabela_final.loc[:, "AnoBase"] = str(year_base)
-            tabela_final.loc[:, "Entidade"] = row.Entidade
-            tabela_final.loc[:, "NumTermo"] = row.NumTermo
-            tabela_final.loc[:, "AnoTermo"] = row.AnoTermo
-            tabela_final.loc[:, "FrequenciaInicial"] = row.FrequenciaInicial
-            tabela_final.loc[:, "FrequenciaFinal"] = row.FrequenciaFinal
-            tabela_final.loc[:, "FrequenciaCentral"] = row.FrequenciaCentral
-            tabela_final.loc[:, "Banda"] = row.Banda
-            tabela_final.loc[:, "Tipo"] = row.Tipo
+            tabela_final["AreaExclusao"] = areas_exclusao
+            tabela_final["MunicipioExclusao"] = municipios_exclusao
+            tabela_final["AnoBase"] = str(year_base)
+            tabela_final["Entidade"] = row.Entidade
+            tabela_final["NumTermo"] = row.NumTermo
+            tabela_final["AnoTermo"] = row.AnoTermo
+            tabela_final[ "FrequenciaInicial"] = row.FrequenciaInicial
+            tabela_final["FrequenciaFinal"] = row.FrequenciaFinal
+            tabela_final["FrequenciaCentral"] = row.FrequenciaCentral
+            tabela_final["Banda"] = row.Banda
+            tabela_final["Tipo"] = row.Tipo
             final_rows.append(tabela_final)
 
         return pd.concat(final_rows, ignore_index=True).drop_duplicates()
