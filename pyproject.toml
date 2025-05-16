@@ -1,7 +1,7 @@
 [project]
 name = "calcula-onus"
 version = "0.1.0"
-description = "Add your description here"
+description = "Aplicação para o Cálculo de Ônus Tributário por município e por estado dado a outorga de radiofrequência"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [

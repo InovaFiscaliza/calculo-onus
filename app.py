@@ -2,10 +2,11 @@ from datetime import datetime as dt
 import pandas as pd
 import numpy as np
 import streamlit as st
-from millify import millify, prettify
+from millify import prettify
 from data_processor import DataProcessor, OPERADORAS
 from calculations import OnusCalculator
 from ui_components import UIComponents
+import toml
 
 EXPECTED_COLUMNS = [
     "AnoBase",
@@ -375,3 +376,11 @@ with aba2:
                 & (st.session_state.df["AnoBase"] == str(year))
             ]
             st.dataframe(df_terms, column_config=COLUMN_CONFIG, hide_index=True)
+
+def get_version():
+    pyproject = toml.load("pyproject.toml")
+    return pyproject.get("project", {}).get("version", "unknown")
+
+__version__ = get_version()
+
+st.caption(f"Versão: {__version__}")
