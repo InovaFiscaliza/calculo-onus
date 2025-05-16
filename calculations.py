@@ -66,6 +66,11 @@ class OnusCalculator:
             df_term, df_other_terms, pop_total, rol_uf
         )
 
+        subconjunto_mun = df_factors["codMun"].astype("string").unique()
+
+        pop_total = df_year_base.loc[df_year_base["codMun"].astype("string").isin(subconjunto_mun), ["codMun", "popMun"]].drop_duplicates()["popMun"].sum()
+
+
         return total_onus, df_factors, pop_total
 
     def _count_frequencies(self, df):

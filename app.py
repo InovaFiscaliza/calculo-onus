@@ -141,16 +141,16 @@ ui.setup_page()
 aba1, aba2 = st.tabs(["Cadastro/Carregamento", "Cálculo do Ônus"])
 
 if "df" not in st.session_state:
-    st.session_state.df = pd.DataFrame(columns=EXPECTED_COLUMNS)
+    st.session_state.df = pd.DataFrame(columns=EXPECTED_COLUMNS, dtype="string")
 
 
 @st.fragment
 def update_df(df):
     """Display data in the data editor"""
-    before_df = st.session_state.df.copy()
+    before_df = st.session_state.df.astype("string").copy()
     st.session_state.df = pd.concat(
-            [st.session_state.df, df], ignore_index=True
-        ).drop_duplicates().reset_index(drop=True)
+            [st.session_state.df, df.astype("string")], ignore_index=True
+        ).drop_duplicates(ignore_index=True).astype("string")
     if st.session_state.df.equals(before_df):
         st.warning("Termo já adicionado!", icon="⚠️")
     else:
@@ -197,6 +197,7 @@ def input_csv_data():
 def edit_df():
     for idx in st.session_state["edited_df"]["deleted_rows"]:
         st.session_state.df.drop(idx, inplace=True)
+    st.session_state.df.reset_index(drop=True, inplace=True)
 
 uploaded_file = st.sidebar.file_uploader(
     "Carregar dados de um arquivo CSV",
@@ -262,7 +263,9 @@ with aba1:
         tipo = second_row[3].selectbox("Tipo", options=["ONUS", "DEMAIS"])
         if st.button("Adicionar Termo"):
             if freq_final - freq_inicial <= 0:
-                st.error("A frequência final deve ser maior que a inicial!")
+                st.error("A frequência final deve ser maior que a inicial!", icon=":material/error:")
+            elif n_termo == "":
+                st.error("O número do termo não pode ser vazio!", icon=":material/error:")
             else:
                 df = pd.DataFrame(
                     {
