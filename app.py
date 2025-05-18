@@ -356,6 +356,20 @@ with aba2:
                             value=f"R$ {prettify(np.round(onus / population_total, 5).item())}",
                         )
 
+                    # Add metrics as a dataframe
+                    metrics_dict = {
+                        "Total de municípios": [len(df_factors)],
+                        "População total": [prettify(population_total)],
+                        f"Ônus Termo: {term}/{term_year}": [f"R$ {prettify(np.round(onus, 2).item())}"],
+                        "Ônus médio por município": [f"R$ {np.round(onus / len(df_factors), 2).item()}"],
+                        "Ônus por habitante": [f"R$ {prettify(np.round(onus / population_total, 5).item())}"],
+                    }
+                    st.dataframe(
+                        pd.DataFrame(metrics_dict),
+                        use_container_width=True,
+                        hide_index=True,
+                    )
+
             else:
                 st.error(error_message)
         if is_valid:
