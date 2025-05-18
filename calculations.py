@@ -101,7 +101,7 @@ class OnusCalculator:
 
         # Calculate bandwidth/frequency ratio
         df_other_terms["BW_Freq"] = (
-            df_other_terms["Banda"] / df_other_terms["FrequenciaCentral"]
+            df_other_terms["Banda"].astype('float') / df_other_terms["FrequenciaCentral"].astype('float')
         )
 
         return df_other_terms
